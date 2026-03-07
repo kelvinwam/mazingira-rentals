@@ -10,27 +10,32 @@ const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', display: 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export const metadata: Metadata = {
-  metadataBase:  new URL(BASE),
+  metadataBase: new URL(BASE),
   title: {
-    default:  'Mazingira — Find Rentals in Machakos County',
-    template: '%s | Mazingira',
+    default:  'MachaRent — Find Rentals in Machakos County',
+    template: '%s | MachaRent',
   },
   description: 'Discover affordable apartments and houses for rent across Machakos County — Machakos CBD, Athi River, Mlolongo, Syokimau and more. Verified listings, real photos, no agents.',
-  keywords:    ['rentals Machakos', 'apartments Machakos', 'houses for rent Machakos', 'Athi River rentals', 'Syokimau apartments', 'Mlolongo rentals'],
-  authors:     [{ name: 'Mazingira' }],
-  creator:     'Mazingira',
+  keywords:    ['rentals Machakos', 'apartments Machakos', 'houses for rent Machakos', 'Athi River rentals', 'Syokimau apartments'],
+  authors:     [{ name: 'MachaRent' }],
+  manifest:    '/manifest.json',
+  appleWebApp: {
+    capable:           true,
+    statusBarStyle:    'black-translucent',
+    title:             'MachaRent',
+  },
   openGraph: {
     type:        'website',
     locale:      'en_KE',
     url:          BASE,
-    siteName:    'Mazingira',
-    title:       'Mazingira — Find Rentals in Machakos County',
+    siteName:    'MachaRent',
+    title:       'MachaRent — Find Rentals in Machakos County',
     description: 'Discover affordable apartments and houses for rent across Machakos County.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Mazingira Rentals' }],
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'MachaRent Rentals' }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       'Mazingira — Find Rentals in Machakos County',
+    title:       'MachaRent — Find Rentals in Machakos County',
     description: 'Discover affordable apartments and houses for rent across Machakos County.',
     images:      ['/og-default.png'],
   },
@@ -42,14 +47,23 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor:   '#f59e0b',
-  width:        'device-width',
-  initialScale: 1,
+  themeColor:          [
+    { media: '(prefers-color-scheme: light)', color: '#f59e0b' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0f172a' },
+  ],
+  width:               'device-width',
+  initialScale:        1,
+  minimumScale:        1,
+  viewportFit:         'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body className={`${sora.variable} ${nunito.variable} font-body antialiased`}>
         <Providers>
           {children}
@@ -57,7 +71,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             position="top-center"
             toastOptions={{
               duration: 3500,
-              style: { borderRadius: '12px', padding: '12px 16px', fontSize: '14px', fontFamily: 'var(--font-nunito)' },
+              style: {
+                borderRadius: '12px',
+                padding:      '12px 16px',
+                fontSize:     '14px',
+                fontFamily:   'var(--font-nunito)',
+              },
             }}
           />
         </Providers>

@@ -41,12 +41,12 @@ export default function LoginPage() {
         <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
           <Home size={17} className="text-white" strokeWidth={2.5} />
         </div>
-        <span className="font-display font-bold text-xl text-navy-900 dark:text-white">Mazingira</span>
+        <span className="font-display font-bold text-xl text-navy-900 dark:text-white">MachaRent</span>
       </Link>
 
       <div className="w-full max-w-sm card p-8">
         <h1 className="font-display font-bold text-2xl text-navy-900 dark:text-white mb-1">Sign in</h1>
-        <p className="text-navy-500 dark:text-navy-400 text-sm mb-7">Welcome back to Mazingira</p>
+        <p className="text-navy-500 dark:text-navy-400 text-sm mb-7">Welcome back to MachaRent</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

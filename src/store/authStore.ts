@@ -4,39 +4,28 @@ import type { User } from '../types';
 interface AuthState {
   user:            User | null;
   isAuthenticated: boolean;
-  isLoading:       boolean;
-  setUser:         (u: User | null) => void;
+  setUser:         (user: User) => void;
   hydrate:         () => void;
-  logout:          () => Promise<void>;
+  logout:          () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user:            null,
   isAuthenticated: false,
-  isLoading:       true,
 
-  setUser: (user) => set({ user, isAuthenticated: !!user, isLoading: false }),
+  setUser: (user) => set({ user, isAuthenticated: true }),
 
   hydrate: () => {
-    if (typeof window === 'undefined') { set({ isLoading: false }); return; }
-    try {
-      const raw = localStorage.getItem('maz_user');
-      if (raw) set({ user: JSON.parse(raw), isAuthenticated: true, isLoading: false });
-      else     set({ isLoading: false });
-    } catch {
-      set({ isLoading: false });
+    if (typeof window === 'undefined') return;
+    const raw = localStorage.getItem('maz_user');
+    const token = localStorage.getItem('maz_access');
+    if (raw && token) {
+      try { set({ user: JSON.parse(raw), isAuthenticated: true }); } catch {}
     }
   },
 
-  logout: async () => {
+  logout: () => {
     if (typeof window !== 'undefined') {
-      try {
-        const refresh = localStorage.getItem('maz_refresh');
-        if (refresh) {
-          const { authAPI } = await import('../lib/api');
-          await authAPI.logout(refresh).catch(() => {});
-        }
-      } catch {}
       localStorage.removeItem('maz_access');
       localStorage.removeItem('maz_refresh');
       localStorage.removeItem('maz_user');
@@ -46,10 +35,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 }));
 
 export function persistAuth(accessToken: string, refreshToken: string, user: User) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('maz_access',  accessToken);
-    localStorage.setItem('maz_refresh', refreshToken);
-    localStorage.setItem('maz_user',    JSON.stringify(user));
-  }
+  localStorage.setItem('maz_access',  accessToken);
+  localStorage.setItem('maz_refresh', refreshToken);
+  localStorage.setItem('maz_user',    JSON.stringify(user));
   useAuthStore.getState().setUser(user);
 }

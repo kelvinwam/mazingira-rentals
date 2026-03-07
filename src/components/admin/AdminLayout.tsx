@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import AdminNav from './AdminNav';
@@ -10,21 +10,14 @@ interface Props { children: React.ReactNode; }
 
 export default function AdminLayout({ children }: Props) {
   const router = useRouter();
-  const { user, isAuthenticated, hydrate } = useAuthStore();
-  const [ready, setReady] = useState(false);
+  const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    hydrate();
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
     if (!isAuthenticated) { router.push('/auth/login'); return; }
     if (user?.role !== 'ADMIN') { router.push('/'); return; }
-  }, [ready, isAuthenticated, user]);
+  }, [isAuthenticated, user]);
 
-  if (!ready || !isAuthenticated || user?.role !== 'ADMIN') {
+  if (!isAuthenticated || user?.role !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-navy-950">
         <Loader2 size={32} className="animate-spin text-amber-500" />

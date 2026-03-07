@@ -22,7 +22,7 @@ export default function Footer() {
               <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                 <Home size={17} className="text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-display font-bold text-lg text-white">Mazingira</span>
+              <span className="font-display font-bold text-lg text-white">MachaRent</span>
             </Link>
             <p className="text-sm leading-relaxed text-white/50">
               Machakos County's trusted rental marketplace. Verified, scam-free apartments.
@@ -78,7 +78,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-navy-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-white/30">© {new Date().getFullYear()} Mazingira. All rights reserved.</p>
+          <p className="text-xs text-white/30">© {new Date().getFullYear()} MachaRent. All rights reserved.</p>
           <p className="text-xs text-white/30">Made for Machakos County 🇰🇪</p>
         </div>
       </div>

@@ -62,7 +62,7 @@ async function seed() {
     const pw   = await bcrypt.hash('admin1234', 12);
     const admin = await query(
       `INSERT INTO users (phone, password_hash, role, full_name, is_phone_verified)
-       VALUES ('+254700000000', $1, 'ADMIN', 'Mazingira Admin', true)
+       VALUES ('+254700000000', $1, 'ADMIN', 'MachaRent Admin', true)
        ON CONFLICT (phone) DO UPDATE SET password_hash=$1, role='ADMIN'
        RETURNING id, phone, role`,
       [pw]

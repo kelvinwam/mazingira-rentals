@@ -1,9 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/listings/page": "app/listings/page.js",
   "/page": "app/page.js",
-  "/areas/[slug]/page": "app/areas/[slug]/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/listings/page": "app/listings/page.js",
+  "/auth/register/page": "app/auth/register/page.js",
   "/landlord/dashboard/page": "app/landlord/dashboard/page.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
   "/listings/[id]/page": "app/listings/[id]/page.js"
 }

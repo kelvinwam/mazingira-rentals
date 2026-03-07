@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Search, MapPin, X, Loader2, Building2 } from 'lucide-react';
 import { searchAPI } from '../../lib/api';
 import { formatKES, cn } from '../../lib/utils';
+
 interface Suggestion {
   id:        string;
   title:     string;

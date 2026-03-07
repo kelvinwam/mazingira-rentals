@@ -6,32 +6,26 @@ function getPool() {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      min: 2,
-      max: 10,
+      min: 2, max: 10,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     });
-    pool.on('error', (err) => {
-      console.error('Unexpected PostgreSQL pool error:', err);
-    });
+    pool.on('error', err => console.error('PG pool error:', err.message));
   }
   return pool;
 }
 
 async function connectDB() {
-  const db = getPool();
-  const client = await db.connect();
+  const client = await getPool().connect();
   console.log('✅ PostgreSQL connected');
   client.release();
-  return db;
 }
 
 async function query(text, params) {
-  const db = getPool();
   try {
-    return await db.query(text, params);
+    return await getPool().query(text, params);
   } catch (err) {
-    console.error('Query error:', { query: text.substring(0, 80), error: err.message });
+    console.error('Query error:', err.message, '\n', text.substring(0, 100));
     throw err;
   }
 }

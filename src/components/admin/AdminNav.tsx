@@ -43,7 +43,7 @@ export default function AdminNav() {
             <Home size={14} className="text-white" strokeWidth={2.5} />
           </div>
           <div>
-            <p className="font-display font-bold text-sm text-white leading-none">Mazingira</p>
+            <p className="font-display font-bold text-sm text-white leading-none">MachaRent</p>
             <p className="text-xs text-navy-400 mt-0.5">Admin Panel</p>
           </div>
         </Link>

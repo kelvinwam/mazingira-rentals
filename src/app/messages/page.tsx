@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/layout/Navbar';
-import InboxList from '@/components/messages/InboxList';
-import { messagesAPI } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
+import Navbar from '../../components/layout/Navbar';
+import InboxList from '../../components/messages/InboxList';
+import { messagesAPI } from '../../lib/api';
+import { useAuthStore } from '../../store/authStore';
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

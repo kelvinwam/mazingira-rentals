@@ -7,19 +7,15 @@ const { ok, fail, safeUser } = require('../../utils/helpers');
 
 // GET /users/me
 router.get('/me', authenticate, async (req, res) => {
-  const r = await query(
-    `SELECT id, phone, full_name, email, role, is_phone_verified, profile_photo, created_at
-     FROM users WHERE id = $1`,
-    [req.user.sub]
-  );
+  const r = await query('SELECT * FROM users WHERE id=$1', [req.user.sub]);
   if (!r.rows[0]) return fail(res, 'User not found', 404);
-  return ok(res, r.rows[0]);
+  return ok(res, safeUser(r.rows[0]));
 });
 
 // PATCH /users/me
 router.patch('/me', authenticate,
   [
-    body('full_name').optional().isLength({ min: 2, max: 100 }).trim(),
+    body('full_name').optional().trim().isLength({ min: 2, max: 100 }),
     body('email').optional().isEmail().normalizeEmail(),
   ],
   async (req, res) => {
@@ -29,17 +25,13 @@ router.patch('/me', authenticate,
     const fields = [];
     const vals   = [];
     let i = 1;
-
     if (req.body.full_name !== undefined) { fields.push(`full_name=$${i++}`); vals.push(req.body.full_name); }
     if (req.body.email     !== undefined) { fields.push(`email=$${i++}`);     vals.push(req.body.email); }
     if (!fields.length) return fail(res, 'Nothing to update.');
 
     fields.push('updated_at=NOW()');
     vals.push(req.user.sub);
-
-    const r = await query(
-      `UPDATE users SET ${fields.join(', ')} WHERE id=$${i} RETURNING *`, vals
-    );
+    const r = await query(`UPDATE users SET ${fields.join(',')} WHERE id=$${i} RETURNING *`, vals);
     return ok(res, safeUser(r.rows[0]), 'Profile updated.');
   }
 );

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt     = 'Mazingira Listing';
+export const alt     = 'MachaRent Listing';
 export const size    = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -36,7 +36,7 @@ export default async function Image({ params }: { params: { id: string } }) {
               <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>M</span>
               </div>
-              <span style={{ color: '#f59e0b', fontSize: 18, fontWeight: 600 }}>Mazingira</span>
+              <span style={{ color: '#f59e0b', fontSize: 18, fontWeight: 600 }}>MachaRent</span>
             </div>
             <p style={{ color: 'white', fontSize: 36, fontWeight: 700, margin: 0, lineHeight: 1.2, marginBottom: 12 }}>
               {l?.title || 'Rental Listing'}
@@ -54,7 +54,7 @@ export default async function Image({ params }: { params: { id: string } }) {
   } catch {
     return new ImageResponse(
       <div style={{ width: '100%', height: '100%', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: '#f59e0b', fontSize: 48, fontWeight: 700 }}>Mazingira</span>
+        <span style={{ color: '#f59e0b', fontSize: 48, fontWeight: 700 }}>MachaRent</span>
       </div>,
       { ...size }
     );

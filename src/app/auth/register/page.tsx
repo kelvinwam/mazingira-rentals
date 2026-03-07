@@ -40,7 +40,7 @@ function RegisterForm() {
       });
       const { accessToken, refreshToken, user } = res.data.data;
       persistAuth(accessToken, refreshToken, user);
-      toast.success('Account created! Welcome to Mazingira 🏠');
+      toast.success('Account created! Welcome to MachaRent 🏠');
       router.push(user.role === 'LANDLORD' ? '/landlord/dashboard' : '/listings');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Registration failed. Try again.');
@@ -62,7 +62,7 @@ function RegisterForm() {
             Your home in Machakos awaits.
           </h2>
           <p className="text-white/60 text-base leading-relaxed mb-10">
-            Join tenants and landlords who trust Mazingira for verified, scam-free rentals.
+            Join tenants and landlords who trust MachaRent for verified, scam-free rentals.
           </p>
           <div className="space-y-3">
             {['Admin-verified listings only','GPS-pinned exact locations','Direct landlord contact','Genuine tenant reviews'].map(item => (
@@ -80,7 +80,7 @@ function RegisterForm() {
           <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
             <Home size={17} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-display font-bold text-xl text-navy-900 dark:text-white">Mazingira</span>
+          <span className="font-display font-bold text-xl text-navy-900 dark:text-white">MachaRent</span>
         </Link>
 
         <div className="w-full max-w-sm">
@@ -91,7 +91,7 @@ function RegisterForm() {
                 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.18 }}>
                 <h1 className="font-display font-bold text-2xl text-navy-900 dark:text-white mb-1">Create account</h1>
-                <p className="text-navy-500 dark:text-navy-400 text-sm mb-7">How will you use Mazingira?</p>
+                <p className="text-navy-500 dark:text-navy-400 text-sm mb-7">How will you use MachaRent?</p>
 
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   {[

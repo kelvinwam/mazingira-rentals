@@ -1,28 +1,18 @@
 const rateLimit = require('express-rate-limit');
 
-const msg = (text) => ({ success: false, message: text });
-
 const defaultLimiter = rateLimit({
-  windowMs:       15 * 60 * 1000,
-  max:            100,
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   standardHeaders: true,
-  legacyHeaders:  false,
-  message: msg('Too many requests. Please slow down.'),
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests. Please slow down.' },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max:      20,
+  max: 20,
   standardHeaders: true,
-  message: msg('Too many auth attempts. Try again in 15 minutes.'),
+  message: { success: false, message: 'Too many attempts. Try again in 15 minutes.' },
 });
 
-const otpLimiter = rateLimit({
-  windowMs:       10 * 60 * 1000,
-  max:            3,
-  keyGenerator:   (req) => req.body?.phone || req.ip,
-  standardHeaders: true,
-  message: msg('Too many OTP requests. Wait 10 minutes before trying again.'),
-});
-
-module.exports = { defaultLimiter, authLimiter, otpLimiter };
+module.exports = { defaultLimiter, authLimiter };

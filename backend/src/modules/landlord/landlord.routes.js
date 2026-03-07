@@ -1,7 +1,7 @@
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 const { body, validationResult } = require('express-validator');
-const { query } = require('../../database/connection');
+const { query }      = require('../../database/connection');
 const { authenticate, requireRole } = require('../../common/middleware/auth.middleware');
 const { ok, fail, paginated, parsePagination } = require('../../utils/helpers');
 const { cloudinary, getUploader } = require('../../config/cloudinary.config');
@@ -25,8 +25,8 @@ router.get('/stats', async (req, res) => {
   ]);
 
   return ok(res, {
-    listings: listings.rows[0],
-    views: parseInt(views.rows[0].total),
+    listings:  listings.rows[0],
+    views:     parseInt(views.rows[0].total),
     inquiries: parseInt(inquiries.rows[0].total),
     wishlists: parseInt(wishlists.rows[0].total),
   });
@@ -96,27 +96,26 @@ router.post('/listings',
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'PENDING')
        RETURNING *`,
       [req.user.sub, area_id, title, description, price_kes, deposit_kes,
-      bedrooms || null, bathrooms || null, floor_level || null,
-        latitude, longitude, address_hint || null]
+       bedrooms || null, bathrooms || null, floor_level || null,
+       latitude, longitude, address_hint || null]
     );
 
     const apt = r.rows[0];
 
     // Insert amenities
     if (amenity_ids.length > 0) {
-      const amenValues = amenity_ids.map((_, i) =>
-        `($1, $${i + 2})`).join(', ');
+      const amenValues = amenity_ids.map((_, i) => `($1, $${i + 2})`).join(', ');
       await query(
         `INSERT INTO apartment_amenities (apartment_id, amenity_id) VALUES ${amenValues} ON CONFLICT DO NOTHING`,
         [apt.id, ...amenity_ids]
-      ).catch(() => { });
+      ).catch(() => {});
     }
 
     // Update area listing count
     await query(
       `UPDATE areas SET listing_count = (SELECT COUNT(*) FROM apartments WHERE area_id=$1 AND status='ACTIVE') WHERE id=$1`,
       [area_id]
-    ).catch(() => { });
+    ).catch(() => {});
 
     return ok(res, apt, 'Listing submitted for review. It will go live once approved by our team.', 201);
   }
@@ -142,8 +141,8 @@ router.get('/listings/:id', async (req, res) => {
            WHERE aa.apartment_id=$1`, [apt.id]),
   ]);
 
-  apt.images = images.rows;
-  apt.amenity_ids = amenities.rows.map((a) => a.id);
+  apt.images      = images.rows;
+  apt.amenity_ids = amenities.rows.map(a => a.id);
 
   return ok(res, apt);
 });
@@ -199,8 +198,8 @@ router.patch('/listings/:id',
        WHERE id=$13 AND landlord_id=$14
        RETURNING *`,
       [title, description, price_kes, deposit_kes, area_id,
-        latitude, longitude, bedrooms, bathrooms, floor_level,
-        address_hint, is_available, req.params.id, req.user.sub]
+       latitude, longitude, bedrooms, bathrooms, floor_level,
+       address_hint, is_available, req.params.id, req.user.sub]
     );
 
     // Update amenities if provided
@@ -211,7 +210,7 @@ router.patch('/listings/:id',
         await query(
           `INSERT INTO apartment_amenities (apartment_id, amenity_id) VALUES ${vals} ON CONFLICT DO NOTHING`,
           [apt.id, ...amenity_ids]
-        ).catch(() => { });
+        ).catch(() => {});
       }
     }
 
@@ -230,7 +229,7 @@ router.delete('/listings/:id', async (req, res) => {
   // Delete images from Cloudinary
   const images = await query('SELECT public_id FROM apartment_images WHERE apartment_id=$1', [req.params.id]);
   for (const img of images.rows) {
-    if (img.public_id) await cloudinary.uploader.destroy(img.public_id).catch(() => { });
+    if (img.public_id) await cloudinary.uploader.destroy(img.public_id).catch(() => {});
   }
 
   await query('DELETE FROM apartments WHERE id=$1', [req.params.id]);
@@ -256,6 +255,32 @@ router.patch('/listings/:id/availability', async (req, res) => {
   return ok(res, updated.rows[0], `Listing marked as ${is_available ? 'available' : 'taken'}.`);
 });
 
+/* ── PATCH /landlord/listings/:id/rent-status ── */
+router.patch('/listings/:id/rent-status', async (req, res) => {
+  const r = await query(
+    'SELECT id, status FROM apartments WHERE id=$1 AND landlord_id=$2',
+    [req.params.id, req.user.sub]
+  );
+  if (!r.rows[0]) return fail(res, 'Listing not found.', 404);
+
+  const { action } = req.body; // 'rent_out' or 'relist'
+  if (!['rent_out', 'relist'].includes(action)) return fail(res, 'action must be rent_out or relist');
+
+  if (action === 'rent_out') {
+    await query(
+      `UPDATE apartments SET status='RENTED', is_available=false, updated_at=NOW() WHERE id=$1`,
+      [req.params.id]
+    );
+    return ok(res, {}, 'Listing marked as rented and removed from public browse.');
+  } else {
+    await query(
+      `UPDATE apartments SET status='ACTIVE', is_available=true, updated_at=NOW() WHERE id=$1`,
+      [req.params.id]
+    );
+    return ok(res, {}, 'Listing re-listed and is now visible to tenants.');
+  }
+});
+
 /* ── POST /landlord/listings/:id/images ─────── */
 router.post('/listings/:id/images', async (req, res) => {
   const apt = await query(
@@ -267,33 +292,43 @@ router.post('/listings/:id/images', async (req, res) => {
   const uploader = getUploader();
 
   uploader.array('images', 10)(req, res, async (err) => {
-    if (err) return fail(res, err.message || 'Image upload failed.' + JSON.stringify(err));
-    if (!req.files || !req.files || req.files.length === 0) return fail(res, 'No images uploaded.');
+    if (err) return fail(res, err.message || 'Image upload failed.');
+    if (!req.files || req.files.length === 0) return fail(res, 'No images uploaded.');
 
     const files = req.files;
     const existingCount = await query(
       'SELECT COUNT(*) FROM apartment_images WHERE apartment_id=$1', [req.params.id]
     );
     const currentCount = parseInt(existingCount.rows[0].count);
-    if (currentCount + files.length > 10) return fail(res, `You can upload a maximum of 10 images. You have ${currentCount} already.`);
-    ;
+    if (currentCount + files.length > 10) {
+      return fail(res, `You can upload a maximum of 10 images. You have ${currentCount} already.`);
+    }
+
+    const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name';
     const isPrimary = currentCount === 0;
-    const inserted = [];
+    const inserted  = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       let url, thumbnail_url, public_id;
 
-      url = file.path;
-      thumbnail_url = file.path.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto/');
-      public_id = file.filename;
+      if (hasCloudinary) {
+        url           = file.path;
+        thumbnail_url = file.path.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto/');
+        public_id     = file.filename;
+      } else {
+        url           = `https://picsum.photos/seed/${Date.now() + i}/1200/900`;
+        thumbnail_url = `https://picsum.photos/seed/${Date.now() + i}/400/300`;
+        public_id     = null;
+      }
 
-      const r = await query(
+      const row = await query(
         `INSERT INTO apartment_images (apartment_id, url, thumbnail_url, public_id, is_primary, display_order)
          VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
         [req.params.id, url, thumbnail_url, public_id, isPrimary && i === 0, currentCount + i]
       );
-      inserted.push(r.rows[0]);
+      inserted.push(row.rows[0]);
     }
 
     return ok(res, inserted, `${inserted.length} image(s) uploaded.`, 201);
@@ -311,7 +346,7 @@ router.delete('/listings/:id/images/:imgId', async (req, res) => {
   if (!img.rows[0]) return fail(res, 'Image not found.', 404);
 
   if (img.rows[0].public_id) {
-    await cloudinary.uploader.destroy(img.rows[0].public_id).catch(() => { });
+    await cloudinary.uploader.destroy(img.rows[0].public_id).catch(() => {});
   }
 
   await query('DELETE FROM apartment_images WHERE id=$1', [req.params.imgId]);
@@ -322,7 +357,7 @@ router.delete('/listings/:id/images/:imgId', async (req, res) => {
       `UPDATE apartment_images SET is_primary=true
        WHERE id=(SELECT id FROM apartment_images WHERE apartment_id=$1 ORDER BY display_order LIMIT 1)`,
       [req.params.id]
-    ).catch(() => { });
+    ).catch(() => {});
   }
 
   return ok(res, {}, 'Image deleted.');
@@ -339,7 +374,7 @@ router.patch('/listings/:id/images/:imgId/primary', async (req, res) => {
   if (!img.rows[0]) return fail(res, 'Image not found.', 404);
 
   await query('UPDATE apartment_images SET is_primary=false WHERE apartment_id=$1', [req.params.id]);
-  await query('UPDATE apartment_images SET is_primary=true  WHERE id=$1', [req.params.imgId]);
+  await query('UPDATE apartment_images SET is_primary=true  WHERE id=$1',           [req.params.imgId]);
 
   return ok(res, {}, 'Cover image updated.');
 });

@@ -14,7 +14,7 @@ export default function CTASection() {
           Are you a landlord in Machakos?
         </h2>
         <p className="text-white/60 text-base leading-relaxed mb-8 max-w-xl mx-auto">
-          List your property on Mazingira for free. Reach thousands of tenants looking for verified rentals in your area.
+          List your property on MachaRent for free. Reach thousands of tenants looking for verified rentals in your area.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/auth/register?role=LANDLORD" className="btn-primary px-8 py-3.5 text-base rounded-xl justify-center">

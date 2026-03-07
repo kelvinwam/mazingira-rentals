@@ -8,6 +8,7 @@ import Navbar         from '../../../components/layout/Navbar';
 import Footer         from '../../../components/layout/Footer';
 import ReviewWidget   from '../../../components/listings/ReviewWidget';
 import WishlistButton from '../../../components/listings/WishlistButton';
+import ShareButton    from '../../../components/listings/ShareButton';
 import { listingsAPI, messagesAPI } from '../../../lib/api';
 import { useAuthStore } from '../../../store/authStore';
 import { cn, formatKES } from '../../../lib/utils';
@@ -77,7 +78,7 @@ export default function ListingDetailPage() {
     return acc;
   }, {});
 
-  const waMsgRaw = `Hi, I'm interested in your listing "${listing.title}" on Mazingira. Is it still available?`;
+  const waMsgRaw = `Hi, I'm interested in your listing "${listing.title}" on MachaRent. Is it still available?`;
   const waMsg    = encodeURIComponent(waMsgRaw);
   const waPhone  = listing.landlord_phone.replace('+', '');
   const isOwner  = user?.id === (listing as any).landlord_id;
@@ -100,7 +101,7 @@ export default function ListingDetailPage() {
             {/* Image carousel */}
             <div className="relative rounded-2xl overflow-hidden aspect-video bg-surface-200 dark:bg-navy-800">
               {curImg ? (
-                <Image src={curImg} alt={listing.title} fill className="object-cover" />
+                <Image src={curImg} alt={listing.title} fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover" priority />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-navy-400 text-sm">No photos yet</div>
               )}
@@ -124,13 +125,21 @@ export default function ListingDetailPage() {
                 </>
               )}
 
-              {/* Availability + wishlist */}
+              {/* Availability badge */}
               <div className={cn('absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold font-display',
                 listing.is_available ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white')}>
                 {listing.is_available ? 'Available' : 'Taken'}
               </div>
+
+              {/* Share + Wishlist */}
               {!isOwner && (
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <ShareButton
+                    listingId={listing.id}
+                    title={listing.title}
+                    price={formatKES(listing.price_kes)}
+                    area={listing.area_name}
+                  />
                   <WishlistButton apartmentId={listing.id} />
                 </div>
               )}
@@ -179,6 +188,7 @@ export default function ListingDetailPage() {
                   </span>
                 )}
               </div>
+
               <p className="text-navy-600 dark:text-navy-300 leading-relaxed text-sm whitespace-pre-line">
                 {listing.description}
               </p>
@@ -208,7 +218,7 @@ export default function ListingDetailPage() {
             {/* Location */}
             <div className="card p-5">
               <h3 className="font-display font-bold text-base text-navy-900 dark:text-white mb-3">Location</h3>
-              <a href={`https://www.google.com/maps?q=${listing.latitude},${listing.longitude}`}
+              <a href={`https://www.google.com/maps?q=$.toFixed(6)},$.toFixed(6)}`}
                 target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-3 p-4 bg-surface-50 dark:bg-navy-800 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors group">
                 <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
@@ -219,7 +229,7 @@ export default function ListingDetailPage() {
                     Open in Google Maps
                   </p>
                   <p className="text-xs text-navy-400 mt-0.5">
-                    {listing.area_name} · {Number(listing.latitude).toFixed(4)}, {Number(listing.longitude).toFixed(4)}
+                    {listing.area_name}.toFixed(4).toFixed(4)
                   </p>
                 </div>
               </a>
@@ -241,6 +251,7 @@ export default function ListingDetailPage() {
           {/* RIGHT sticky card */}
           <div className="lg:col-span-1">
             <div className="card p-5 lg:sticky lg:top-24 space-y-4">
+
               {/* Price */}
               <div>
                 <p className="text-2xl font-display font-extrabold text-navy-900 dark:text-white">
@@ -271,7 +282,7 @@ export default function ListingDetailPage() {
                 </div>
               </div>
 
-              {/* Contact buttons */}
+              {/* Contact buttons — only for non-owners */}
               {!isOwner && (
                 <>
                   <a href={`tel:${listing.landlord_phone}`} className="btn-primary w-full py-3 justify-center">
@@ -283,8 +294,9 @@ export default function ListingDetailPage() {
                     <MessageSquare size={16} /> WhatsApp
                   </a>
 
-                  {/* In-app message */}
                   <div className="h-px bg-surface-100 dark:bg-navy-800" />
+
+                  {/* In-app message */}
                   {!msgSent ? (
                     <form onSubmit={sendMessage} className="space-y-2">
                       <p className="text-xs font-semibold text-navy-700 dark:text-navy-300">Message Landlord</p>
@@ -293,7 +305,9 @@ export default function ListingDetailPage() {
                         rows={3} className="input resize-none text-sm w-full" />
                       <button type="submit" disabled={msgLoading || !msgText.trim()}
                         className="btn-secondary w-full py-2.5 justify-center text-sm disabled:opacity-50">
-                        {msgLoading ? <><Loader2 size={14} className="animate-spin" /> Sending…</> : <><Send size={14} /> Send Message</>}
+                        {msgLoading
+                          ? <><Loader2 size={14} className="animate-spin" /> Sending…</>
+                          : <><Send size={14} /> Send Message</>}
                       </button>
                     </form>
                   ) : (
@@ -304,18 +318,25 @@ export default function ListingDetailPage() {
                       </Link>
                     </div>
                   )}
-                </>
-              )}
 
-              {!isOwner && (
-                <>
                   <div className="h-px bg-surface-100 dark:bg-navy-800" />
-                  <WishlistButton apartmentId={listing.id} size="sm"
-                    className="w-full !rounded-xl !h-9 !w-full gap-2 text-sm font-medium" />
+
+                  {/* Wishlist + Share */}
+                  <div className="flex gap-2">
+                    <WishlistButton apartmentId={listing.id} size="sm"
+                      className="flex-1 !rounded-xl !h-9 gap-2 text-sm font-medium" />
+                    <ShareButton
+                      listingId={listing.id}
+                      title={listing.title}
+                      price={formatKES(listing.price_kes)}
+                      area={listing.area_name}
+                    />
+                  </div>
                 </>
               )}
 
               <div className="h-px bg-surface-100 dark:bg-navy-800" />
+
               <Link href={`/listings?area=${listing.area_slug}`}
                 className="flex items-center gap-2 text-sm text-navy-500 dark:text-navy-400 hover:text-amber-500 transition-colors">
                 <MapPin size={14} className="text-amber-500" />

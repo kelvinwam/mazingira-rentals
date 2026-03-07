@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AdminLayout  from '../../../components/admin/AdminLayout';
 import StatusBadge  from '../../../components/admin/StatusBadge';
-import { adminAPI } from '../../../lib/api';
+import { adminAPI } from '../../..//lib/api';
 import { timeAgo, cn } from '../../../lib/utils';
 import { Search, ChevronLeft, ChevronRight, Eye, UserX, UserCheck, Loader2, Users } from 'lucide-react';
 import toast from 'react-hot-toast';

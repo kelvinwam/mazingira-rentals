@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Home, Menu, X, Moon, Sun, User, LogOut,
-  LayoutDashboard, Building2, ChevronDown, Heart, MessageSquare
+  LayoutDashboard, Building2, ChevronDown, MessageSquare, Heart
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore }   from '../../store/uiStore';
@@ -58,7 +58,7 @@ export default function Navbar() {
             </div>
             <span className={cn('font-display font-bold text-lg transition-colors',
               isHero && !scrolled ? 'text-white' : 'text-navy-900 dark:text-white')}>
-              Mazingira
+              MachaRent
             </span>
           </Link>
 

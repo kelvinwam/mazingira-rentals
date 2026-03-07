@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title:       `Rentals in ${area.name}, Machakos County`,
     description: `Browse ${area.listing_count || 0} rental listings in ${area.name}. Find apartments and houses for rent in ${area.name}, Machakos County.`,
     openGraph: {
-      title:       `Rentals in ${area.name} | Mazingira`,
+      title:       `Rentals in ${area.name} | MachaRent`,
       description: `Find rental apartments in ${area.name}, Machakos County.`,
       url:          `${BASE}/areas/${params.slug}`,
     },

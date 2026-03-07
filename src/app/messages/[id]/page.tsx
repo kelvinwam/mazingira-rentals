@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/layout/Navbar';
-import InboxList from '@/components/messages/InboxList';
-import MessageThread from '@/components/messages/MessageThread';
-import { messagesAPI } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
+import Navbar from '../../..//components/layout/Navbar';
+import InboxList from '../../../components/messages/InboxList';
+import MessageThread from '../../../components/messages/MessageThread';
+import { messagesAPI } from '../../../lib/api';
+import { useAuthStore } from '../../../store/authStore';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

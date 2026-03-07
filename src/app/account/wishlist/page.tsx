@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import ListingCard, { ListingCardSkeleton } from '@/components/listings/ListingCard';
-import { wishlistAPI } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
+import Navbar from '../../../components/layout/Navbar';
+import Footer from '../../../components/layout/Footer';
+import ListingCard, { ListingCardSkeleton } from '../../../components/listings/ListingCard';
+import { wishlistAPI } from '../../../lib/api';
+import { useAuthStore } from '../../../store/authStore';
 import { Heart, ArrowLeft } from 'lucide-react';
-import type { ListingCard as ListingCardType } from '@/types';
+import type { ListingCard as ListingCardType } from '../../../types';
 import toast from 'react-hot-toast';
 
 export default function WishlistPage() {

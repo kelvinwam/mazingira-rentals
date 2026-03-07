@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       title:       l.title,
       description: `${l.title} in ${l.area_name}, Machakos County. ${price}. ${l.description?.slice(0, 120) || ''}`,
       openGraph: {
-        title:       `${l.title} | Mazingira`,
+        title:       `${l.title} | MachaRent`,
         description: desc,
         url:          `${BASE}/listings/${params.id}`,
         images:       img ? [{ url: img, width: 1200, height: 900, alt: l.title }] : [],

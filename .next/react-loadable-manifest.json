@@ -16,11 +16,5 @@
     "files": [
       "static/chunks/_pages-dir-browser_node_modules_next_dist_pages__error_js.js"
     ]
-  },
-  "store\\authStore.ts -> ../lib/api": {
-    "id": "store\\authStore.ts -> ../lib/api",
-    "files": [
-      "static/chunks/_app-pages-browser_src_lib_api_ts.js"
-    ]
   }
 }

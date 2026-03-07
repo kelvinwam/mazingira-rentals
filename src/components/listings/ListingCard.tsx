@@ -4,7 +4,7 @@ import Link  from 'next/link';
 import Image from 'next/image';
 import { MapPin, Bed, Bath, Star, ShieldCheck } from 'lucide-react';
 import { cn, formatKES } from '../../lib/utils';
-import type { ListingCard as ListingCardType } from '../../types';
+import type { ListingCard as ListingCardType } from '../..//types';
 
 interface Props { listing: ListingCardType; }
 
@@ -17,6 +17,7 @@ export default function ListingCard({ listing: l }: Props) {
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-100 dark:bg-navy-800">
         {l.primary_image ? (
           <Image src={l.thumbnail || l.primary_image} alt={l.title} fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

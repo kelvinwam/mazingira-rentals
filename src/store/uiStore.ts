@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
 interface UIState {
-  dark:         boolean;
-  toggleDark:   () => void;
-  initTheme:    () => void;
+  dark:       boolean;
+  toggleDark: () => void;
+  initTheme:  () => void;
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -20,7 +20,7 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   initTheme: () => {
     if (typeof window === 'undefined') return;
-    const saved      = localStorage.getItem('maz_theme');
+    const saved       = localStorage.getItem('maz_theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark      = saved === 'dark' || (!saved && prefersDark);
     document.documentElement.classList.toggle('dark', isDark);

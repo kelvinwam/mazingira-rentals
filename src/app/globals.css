@@ -1,46 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-display: 'Sora', sans-serif;
-  --font-body:    'Nunito', sans-serif;
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
+body { font-family: 'Nunito', sans-serif; -webkit-font-smoothing: antialiased; }
 
-body {
-  font-family: var(--font-body);
-  background-color: #F8F9FC;
-  color: #0F1E3C;
-  -webkit-font-smoothing: antialiased;
-}
+*:focus-visible { outline: 2px solid #F59E0B; outline-offset: 3px; border-radius: 4px; }
 
-.dark body {
-  background-color: #080E22;
-  color: #EFF6FF;
-}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 4px; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 
-/* Scrollbar */
-::-webkit-scrollbar              { width: 5px; }
-::-webkit-scrollbar-track        { background: transparent; }
-::-webkit-scrollbar-thumb        { background: rgba(0,0,0,0.12); border-radius: 4px; }
-.dark ::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.1); }
-
-/* Focus ring */
-*:focus-visible {
-  outline: 2px solid #F59E0B;
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-/* Skeleton shimmer */
 .skeleton {
-  background: linear-gradient(90deg, #E4E7F0 25%, #F1F3F9 50%, #E4E7F0 75%);
+  background: linear-gradient(90deg, #e4e7f0 25%, #f1f3f9 50%, #e4e7f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s linear infinite;
 }
@@ -49,7 +24,6 @@ body {
   background-size: 200% 100%;
 }
 
-/* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, #F59E0B 0%, #FFC107 60%, #D97706 100%);
   -webkit-background-clip: text;
@@ -57,58 +31,46 @@ body {
   background-clip: text;
 }
 
-/* Glass */
 .glass {
   background: rgba(255,255,255,0.08);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255,255,255,0.12);
 }
 
-/* Dot pattern bg */
 .dot-pattern {
-  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 @layer components {
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2
-           bg-amber-500 hover:bg-amber-600 active:bg-amber-700
+           bg-amber-500 hover:bg-amber-600 active:scale-95
            text-white font-semibold font-display text-sm
-           px-5 py-2.5 rounded-xl
-           transition-all duration-200 shadow-md hover:shadow-amber
-           active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none;
+           px-5 py-2.5 rounded-xl transition-all duration-150
+           shadow-md hover:shadow-amber
+           disabled:opacity-50 disabled:pointer-events-none select-none;
   }
-
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2
-           bg-white dark:bg-navy-900 border border-surface-200 dark:border-navy-700
-           text-navy-800 dark:text-navy-100 font-semibold font-display text-sm
-           px-5 py-2.5 rounded-xl
-           transition-all duration-200 hover:border-amber-400
-           active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none;
+           bg-white dark:bg-navy-900
+           border border-gray-200 dark:border-navy-700
+           text-navy-800 dark:text-white font-semibold font-display text-sm
+           px-5 py-2.5 rounded-xl transition-all duration-150
+           hover:border-amber-400 active:scale-95
+           disabled:opacity-50 disabled:pointer-events-none select-none;
   }
-
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2
-           text-navy-600 dark:text-navy-400 font-medium text-sm
-           px-3 py-2 rounded-lg transition-colors duration-200
-           hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10;
-  }
-
   .input {
     @apply w-full px-4 py-3 bg-white dark:bg-navy-900
-           border border-surface-200 dark:border-navy-700 rounded-xl
-           text-navy-900 dark:text-white placeholder-surface-300 dark:placeholder-navy-500
-           text-sm shadow-input transition-all duration-200
+           border border-gray-200 dark:border-navy-700 rounded-xl
+           text-navy-900 dark:text-white placeholder-gray-400
+           text-sm transition-all duration-150
            focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400;
   }
-
   .label {
     @apply block font-semibold text-sm text-navy-700 dark:text-navy-300 mb-1.5 font-display;
   }
-
   .card {
-    @apply bg-white dark:bg-navy-900 border border-surface-100 dark:border-navy-800 rounded-2xl shadow-card;
+    @apply bg-white dark:bg-navy-900 border border-gray-100 dark:border-navy-800 rounded-2xl shadow-card;
   }
 }
