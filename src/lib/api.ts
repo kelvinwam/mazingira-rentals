@@ -139,3 +139,8 @@ export const adminAPI = {
   // reviews
   deleteReview:     (id: string)                            => api.delete(`/admin/reviews/${id}`),
 };
+
+export const searchAPI = {
+  search:  (params: Record<string,any>) => api.get('/search', { params }),
+  suggest: (q: string)                  => api.get('/search/suggest', { params: { q } }),
+};

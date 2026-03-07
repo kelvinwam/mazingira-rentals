@@ -13,7 +13,7 @@ const storage = new CloudinaryStorage({
   params: async (_req, file) => ({
     folder:          'mazingira/listings',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation:  [{ width: 1200, height: 900, crop: 'limit', quality: 'auto:good' }],
+    transformation: [{ width: 1920, height: 1440, crop: 'limit', quality: 'auto:best' }],
     public_id:       `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   }),
 });

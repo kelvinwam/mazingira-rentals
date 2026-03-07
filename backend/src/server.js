@@ -21,6 +21,7 @@ const landlordRoutes = require('./modules/landlord/landlord.routes');
 const wishlistRoutes = require('./modules/wishlist/wishlist.routes');
 const messagesRoutes = require('./modules/messages/messages.routes');
 const adminRoutes    = require('./modules/admin/admin.routes');
+const searchRoutes   = require('./modules/search/search.routes');
 
 const app = express();
 
@@ -38,7 +39,7 @@ app.use(defaultLimiter);
 
 app.get('/health', (_req, res) => res.json({
   success:     true,
-  service:     'Mazingira API — Stage 5',
+  service:     'Mazingira API — Stage 6',
   environment: process.env.NODE_ENV || 'development',
   timestamp:   new Date().toISOString(),
 }));
@@ -54,6 +55,7 @@ app.use(`${V1}/landlord`, landlordRoutes);
 app.use(`${V1}/wishlist`, wishlistRoutes);
 app.use(`${V1}/messages`, messagesRoutes);
 app.use(`${V1}/admin`,    adminRoutes);
+app.use(`${V1}/search`,   searchRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -64,10 +66,10 @@ async function bootstrap() {
   try {
     await connectDB();
     app.listen(PORT, () => {
-      console.log(`\n✅  Mazingira API (Stage 5) running → http://localhost:${PORT}\n`);
+      console.log(`\n✅  Mazingira API (Stage 6) running → http://localhost:${PORT}\n`);
     });
   } catch (err) {
-    console.error('❌ Failed to start:', err.message, '\n', err.stack);
+    console.error('❌ Failed to start:', err.message);
     process.exit(1);
   }
 }

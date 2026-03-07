@@ -1,124 +1,82 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, ShieldCheck, Star, Home } from 'lucide-react';
-
-const AREAS = [
-  { label: 'Machakos CBD', slug: 'machakos-cbd' },
-  { label: 'Athi River',   slug: 'athi-river'   },
-  { label: 'Mlolongo',     slug: 'mlolongo'     },
-  { label: 'Syokimau',     slug: 'syokimau'     },
-  { label: 'Kathiani',     slug: 'kathiani'     },
-  { label: 'Masii',        slug: 'masii'        },
-];
+import Link from 'next/link';
+import { Shield, Star, Home, ArrowRight } from 'lucide-react';
+import SearchBar from '../../components/listings/SearchBar';
+import { areasAPI } from '../../lib/api';
+import type { Area } from '../../types';
 
 export default function HeroSection() {
   const router = useRouter();
-  const [q,    setQ]    = useState('');
-  const [area, setArea] = useState('');
+  const [areas, setAreas] = useState<Area[]>([]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (q)    params.set('q',    q);
-    if (area) params.set('area', area);
-    router.push(`/listings?${params.toString()}`);
-  };
+  useEffect(() => {
+    areasAPI.list().then(r => setAreas(r.data.data.slice(0, 6))).catch(() => {});
+  }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-navy-950 dot-pattern">
-      {/* Ambient glow */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 35%, rgba(245,158,11,0.12) 0%, transparent 65%)' }} />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-navy-950">
 
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 text-center">
+      {/* Background */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-600/5 rounded-full blur-3xl" />
+        <div className="dot-pattern absolute inset-0 opacity-20" />
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white/70 text-sm font-medium">Machakos County's rental marketplace</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold mb-6 animate-fadeIn">
+          <Star size={11} className="fill-amber-400" /> Machakos County's #1 Rental Platform
         </div>
 
         {/* Headline */}
-        <h1 className="font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl text-white mb-5 leading-[1.05] animate-fade-up">
-          Find Your Home<br />
-          <span className="gradient-text">in Machakos.</span>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-white leading-tight mb-5 animate-fadeUp">
+          Find Your Perfect
+          <span className="gradient-text block">Home in Machakos</span>
         </h1>
 
-        <p className="text-white/55 text-lg leading-relaxed mb-10 max-w-xl mx-auto animate-fade-up"
-          style={{ animationDelay: '0.1s' }}>
-          Verified apartments. Real photos. Exact GPS locations.
-          No scams — just your perfect home.
+        <p className="text-navy-300 text-lg max-w-2xl mx-auto mb-10 animate-fadeUp">
+          Browse verified rentals across Machakos CBD, Athi River, Syokimau, Mlolongo and more. Real photos, real prices, no agents.
         </p>
 
-        {/* Search box */}
-        <form onSubmit={handleSearch}
-          className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto mb-8 animate-fade-up"
-          style={{ animationDelay: '0.15s' }}>
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none" />
-            <input value={q} onChange={e => setQ(e.target.value)}
-              placeholder="Search apartments, areas…"
-              className="w-full h-13 pl-10 pr-4 py-3.5 bg-white dark:bg-navy-900 rounded-xl text-navy-900 dark:text-white
-                         placeholder-navy-400 text-sm border border-surface-200 dark:border-navy-700
-                         focus:outline-none focus:ring-2 focus:ring-amber-400/60 shadow-card" />
+        {/* Search */}
+        <div className="max-w-2xl mx-auto mb-8 animate-fadeUp">
+          <SearchBar
+            className="w-full"
+            onSearch={q => router.push(`/listings?q=${encodeURIComponent(q)}`)}
+            autoFocus={false}
+          />
+        </div>
+
+        {/* Area pills */}
+        {areas.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-12 animate-fadeIn">
+            <span className="text-navy-400 text-sm self-center">Browse by area:</span>
+            {areas.map(a => (
+              <Link key={a.id} href={`/areas/${a.slug}`}
+                className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-medium hover:bg-amber-500/20 hover:border-amber-500/30 hover:text-amber-300 transition-all">
+                {a.name}
+              </Link>
+            ))}
           </div>
-          <select value={area} onChange={e => setArea(e.target.value)}
-            className="h-13 px-4 py-3.5 bg-white dark:bg-navy-900 rounded-xl text-navy-900 dark:text-white text-sm
-                       border border-surface-200 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-amber-400/60 shadow-card sm:w-44">
-            <option value="">All Areas</option>
-            {AREAS.map(a => <option key={a.slug} value={a.slug}>{a.label}</option>)}
-          </select>
-          <button type="submit" className="btn-primary px-7 py-3.5 rounded-xl text-base h-13">Search</button>
-        </form>
+        )}
 
-        {/* Quick area pills */}
-        <div className="flex flex-wrap justify-center gap-2 mb-14 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          {AREAS.map(a => (
-            <button key={a.slug} onClick={() => router.push(`/listings?area=${a.slug}`)}
-              className="flex items-center gap-1.5 glass rounded-full px-3.5 py-1.5 text-white/70 text-xs font-medium
-                         hover:bg-white/15 hover:text-white transition-all">
-              <MapPin size={11} className="text-amber-400" />
-              {a.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Trust signals */}
-        <div className="flex flex-wrap justify-center gap-4 mb-14 animate-fade-up" style={{ animationDelay: '0.25s' }}>
-          {[
-            { icon: ShieldCheck, label: 'Admin Verified',    color: 'text-emerald-400' },
-            { icon: Star,        label: 'Genuine Reviews',   color: 'text-amber-400'   },
-            { icon: MapPin,      label: 'GPS Locations',     color: 'text-blue-400'    },
-            { icon: Home,        label: 'No Commission',     color: 'text-purple-400'  },
-          ].map(t => (
-            <div key={t.label} className="flex items-center gap-2 glass rounded-full px-4 py-1.5">
-              <t.icon size={13} className={t.color} />
-              <span className="text-white/70 text-xs font-medium">{t.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Stats */}
-        <div className="flex flex-wrap justify-center gap-x-12 gap-y-5 animate-fade-up" style={{ animationDelay: '0.3s' }}>
-          {[
-            { v: '6',    l: 'Areas in Machakos' },
-            { v: '0',    l: 'Commission Fees'   },
-            { v: '100%', l: 'Admin Verified'    },
-          ].map((s, i) => (
-            <div key={s.l} className="flex items-center gap-4">
-              {i > 0 && <div className="w-px h-8 bg-white/10" />}
-              <div>
-                <p className="font-display font-extrabold text-2xl text-white">{s.v}</p>
-                <p className="text-white/40 text-xs mt-0.5">{s.l}</p>
-              </div>
-            </div>
-          ))}
+        {/* Trust badges */}
+        <div className="flex flex-wrap justify-center gap-6 text-navy-400 text-xs animate-fadeIn">
+          <span className="flex items-center gap-1.5"><Shield size={12} className="text-amber-500" /> Verified Listings</span>
+          <span className="flex items-center gap-1.5"><Home size={12} className="text-amber-500" /> Real Photos</span>
+          <span className="flex items-center gap-1.5"><Star size={12} className="text-amber-500" /> Tenant Reviews</span>
+          <span className="flex items-center gap-1.5">
+            <ArrowRight size={12} className="text-amber-500" />
+            <Link href="/listings" className="hover:text-amber-400 transition-colors">View All Listings</Link>
+          </span>
         </div>
       </div>
-
-      {/* Bottom fade */}
-      <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-surface-50 dark:from-navy-950 to-transparent pointer-events-none" />
     </section>
   );
 }

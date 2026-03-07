@@ -67,7 +67,30 @@ router.get('/featured', async (req, res) => {
 
 /* GET /listings/:id — public */
 router.get('/:id', optionalAuth, async (req, res) => {
-  await query('UPDATE apartments SET view_count=view_count+1 WHERE id=$1', [req.params.id]).catch(() => {});
+  // Unique view — one per IP per 24 hours, wrapped safely so it never blocks the listing
+  try {
+    const ip      = (req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown').trim();
+    const viewKey = `${req.params.id}:${ip}`;
+
+    const seen = await query(
+      `SELECT 1 FROM engagement_logs
+       WHERE apartment_id=$1 AND ip_address=$2 AND event_type='VIEW'
+         AND created_at > NOW() - INTERVAL '24 hours'
+       LIMIT 1`,
+      [req.params.id, viewKey]
+    );
+
+    if (!seen.rows[0]) {
+      await query('UPDATE apartments SET view_count=view_count+1 WHERE id=$1', [req.params.id]);
+      await query(
+        `INSERT INTO engagement_logs (apartment_id, ip_address, event_type, user_id, session_id)
+         VALUES ($1, $2, 'VIEW', $3, $4)`,
+        [req.params.id, viewKey, req.user?.sub || null, null]
+      );
+    }
+  } catch {
+    // View tracking failed — don't block the listing from loading
+  }
 
   const r = await query(
     `SELECT a.*, ar.name AS area_name, ar.slug AS area_slug,

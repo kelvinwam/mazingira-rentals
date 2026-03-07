@@ -219,7 +219,7 @@ export default function ListingDetailPage() {
                     Open in Google Maps
                   </p>
                   <p className="text-xs text-navy-400 mt-0.5">
-                    {listing.area_name} · {listing.latitude.toFixed(4)}, {listing.longitude.toFixed(4)}
+                    {listing.area_name} · {Number(listing.latitude).toFixed(4)}, {Number(listing.longitude).toFixed(4)}
                   </p>
                 </div>
               </a>

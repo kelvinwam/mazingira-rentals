@@ -1,10 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
-  "/admin/listings/[id]/page": "app/admin/listings/[id]/page.js",
-  "/page": "app/page.js",
-  "/landlord/dashboard/page": "app/landlord/dashboard/page.js",
   "/listings/page": "app/listings/page.js",
-  "/admin/reports/page": "app/admin/reports/page.js",
-  "/admin/users/[id]/page": "app/admin/users/[id]/page.js"
+  "/page": "app/page.js",
+  "/areas/[slug]/page": "app/areas/[slug]/page.js",
+  "/landlord/dashboard/page": "app/landlord/dashboard/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/listings/[id]/page": "app/listings/[id]/page.js"
 }

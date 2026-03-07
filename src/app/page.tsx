@@ -13,9 +13,9 @@ export default function HomePage() {
       <Navbar />
       <HeroSection />
       <TrustBar />
+      <HowItWorks />
       <PopularAreas />
       <FeaturedListings />
-      <HowItWorks />
       <CTASection />
       <Footer />
     </div>
