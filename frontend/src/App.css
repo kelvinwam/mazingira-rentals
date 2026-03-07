@@ -1,0 +1,184 @@
+/* ===========================
+   Mazingira Rentals — App CSS
+   =========================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #2e7d32;
+  --green-light: #4caf50;
+  --green-dark: #1b5e20;
+  --red: #c62828;
+  --red-light: #ef5350;
+  --yellow: #f9a825;
+  --white: #ffffff;
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --text: #212121;
+  --text-muted: #757575;
+  --border: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+  --radius: 10px;
+}
+
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+
+/* ---- Navbar ---- */
+.navbar { display: flex; align-items: center; justify-content: space-between; background: var(--green); color: var(--white); padding: 0 24px; height: 60px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
+.navbar-brand a { font-size: 1.3rem; font-weight: 700; color: var(--white); }
+.navbar-tagline { font-size: 0.75rem; opacity: 0.8; margin-left: 8px; }
+.navbar-links { display: flex; align-items: center; gap: 20px; }
+.navbar-links a { color: var(--white); font-size: 0.95rem; opacity: 0.9; }
+.navbar-links a:hover { opacity: 1; }
+.navbar-user { font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+.btn-logout { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: var(--white); padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+.btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+/* ---- Buttons ---- */
+.btn-primary { background: var(--green); color: var(--white); border: none; padding: 10px 22px; border-radius: var(--radius); cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: background 0.2s; }
+.btn-primary:hover { background: var(--green-dark); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-full { width: 100%; }
+.btn-sm { padding: 5px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; }
+.btn-edit { background: #1565c0; color: var(--white); }
+.btn-edit:hover { background: #0d47a1; }
+.btn-danger { background: var(--red); color: var(--white); }
+.btn-danger:hover { background: #b71c1c; }
+.btn-verify { background: var(--green); color: var(--white); border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 1rem; }
+.btn-verify:hover { background: var(--green-dark); }
+.btn-reject { background: var(--red); color: var(--white); border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 1rem; }
+.btn-reject:hover { background: #b71c1c; }
+
+/* ---- Messages ---- */
+.error { color: var(--red); background: #ffebee; border: 1px solid #ef9a9a; padding: 10px 14px; border-radius: var(--radius); margin: 10px 0; }
+.success { color: var(--green-dark); background: #e8f5e9; border: 1px solid #a5d6a7; padding: 10px 14px; border-radius: var(--radius); margin: 10px 0; }
+.loading { color: var(--text-muted); }
+.empty { color: var(--text-muted); font-style: italic; }
+.action-msg { margin-top: 10px; font-weight: 600; font-size: 1rem; }
+
+/* ---- Page ---- */
+.page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+/* ---- Hero ---- */
+.hero { background: linear-gradient(135deg, var(--green), var(--green-dark)); color: var(--white); border-radius: var(--radius); padding: 40px 32px; margin-bottom: 32px; }
+.hero h1 { font-size: 2rem; margin-bottom: 10px; }
+.hero p { font-size: 1.05rem; opacity: 0.9; margin-bottom: 24px; }
+
+/* ---- Search Form ---- */
+.search-form { display: flex; flex-wrap: wrap; gap: 10px; }
+.search-form input { flex: 1; min-width: 150px; padding: 10px 14px; border: none; border-radius: var(--radius); font-size: 0.95rem; }
+.search-form .btn-primary { white-space: nowrap; }
+
+/* ---- Listings Grid ---- */
+.listings-section h2 { font-size: 1.4rem; margin-bottom: 18px; color: var(--text); }
+.listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.listing-link { display: block; color: inherit; }
+
+/* ---- Listing Card ---- */
+.listing-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; height: 100%; }
+.listing-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.13); }
+.listing-card-img { width: 100%; height: 180px; object-fit: cover; }
+.listing-card-img-placeholder { width: 100%; height: 180px; background: #e8f5e9; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+.listing-card-body { padding: 16px; }
+.listing-card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+.listing-card-location { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 6px; }
+.listing-card-price { color: var(--green-dark); font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+.listing-card-meta { display: flex; gap: 16px; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 6px; }
+.listing-card-amenities { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ---- Listing Detail ---- */
+.back-link { color: var(--green); font-weight: 500; display: inline-block; margin-bottom: 16px; }
+.listing-detail { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.listing-detail-img { width: 100%; max-height: 420px; object-fit: cover; }
+.listing-detail-img-placeholder { background: #e8f5e9; height: 300px; display: flex; align-items: center; justify-content: center; font-size: 8rem; }
+.listing-detail-body { padding: 28px; }
+.verified-badge { background: #e8f5e9; color: var(--green-dark); border: 1px solid #a5d6a7; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600; }
+.listing-detail-body h1 { font-size: 1.7rem; margin-bottom: 8px; }
+.listing-detail-location { color: var(--text-muted); margin-bottom: 8px; font-size: 1rem; }
+.listing-detail-price { color: var(--green-dark); font-weight: 700; font-size: 1.4rem; margin-bottom: 14px; }
+.listing-detail-meta { display: flex; gap: 20px; font-size: 1rem; margin-bottom: 18px; }
+.listing-detail-amenities, .listing-detail-description, .listing-detail-contact { margin-bottom: 20px; }
+.listing-detail-amenities h3, .listing-detail-description h3, .listing-detail-contact h3 { font-size: 1.05rem; color: var(--green-dark); margin-bottom: 6px; }
+.listing-detail-contact { background: #f1f8e9; border-radius: var(--radius); padding: 16px; }
+
+/* ---- Auth Pages ---- */
+.auth-page { display: flex; justify-content: center; padding: 40px 20px; }
+.auth-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 36px 32px; width: 100%; max-width: 420px; }
+.auth-card h2 { text-align: center; margin-bottom: 24px; color: var(--green-dark); }
+.auth-switch { text-align: center; margin-top: 18px; color: var(--text-muted); }
+.auth-switch a { color: var(--green); font-weight: 600; }
+
+/* ---- Form Styles ---- */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: var(--text); }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: var(--white); transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--green-light); }
+.form-hint { font-size: 0.9rem; color: var(--text-muted); background: #fffde7; border: 1px solid #ffe082; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
+
+/* ---- Dashboard ---- */
+.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.dashboard-header h1 { font-size: 1.7rem; }
+.listing-form-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 28px; }
+.listing-form-card h2 { font-size: 1.2rem; margin-bottom: 14px; color: var(--green-dark); }
+.form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 160px; }
+
+/* ---- Table ---- */
+.listings-table-wrap { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; }
+.listings-table { width: 100%; border-collapse: collapse; }
+.listings-table th, .listings-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.listings-table th { background: #f1f8e9; font-weight: 600; color: var(--green-dark); }
+.listings-table tr:last-child td { border-bottom: none; }
+.table-actions { display: flex; gap: 8px; }
+
+/* ---- Status Badge ---- */
+.status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+.status-pending { background: #fff8e1; color: #e65100; }
+.status-verified { background: #e8f5e9; color: var(--green-dark); }
+.status-rejected { background: #ffebee; color: var(--red); }
+
+/* ---- Admin Dashboard ---- */
+.admin-page h1 { font-size: 1.7rem; margin-bottom: 4px; }
+.admin-subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; }
+.admin-layout { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+.admin-left { display: flex; flex-direction: column; gap: 12px; }
+.filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-tab { padding: 7px 16px; border: 2px solid var(--border); border-radius: 20px; background: var(--white); cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+.filter-tab.active { border-color: var(--green); background: var(--green); color: var(--white); }
+.admin-listing-list { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; }
+.admin-listing-item { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px; cursor: pointer; transition: border-color 0.2s; }
+.admin-listing-item:hover { border-color: var(--green-light); }
+.admin-listing-item.selected { border-color: var(--green); background: #f1f8e9; }
+.admin-listing-item-title { font-weight: 600; margin-bottom: 4px; }
+.admin-listing-item-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+.admin-listing-item-landlord { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+.admin-placeholder { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 40px; text-align: center; color: var(--text-muted); }
+.admin-detail { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+.admin-detail h2 { font-size: 1.4rem; margin-bottom: 8px; }
+.admin-detail-status { margin-bottom: 16px; }
+.admin-detail-info { display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; background: #f9f9f9; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+.admin-detail-landlord { background: #e3f2fd; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+.admin-detail-landlord h3 { margin-bottom: 8px; color: #1565c0; font-size: 1rem; }
+.admin-detail-landlord div { font-size: 0.9rem; margin-bottom: 4px; }
+.admin-verify-section { background: #fffde7; border: 1px solid #ffe082; border-radius: 8px; padding: 18px; margin-bottom: 18px; }
+.admin-verify-section h3 { margin-bottom: 6px; color: #e65100; }
+.verify-hint { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; }
+.admin-verify-section textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; margin-bottom: 12px; resize: vertical; }
+.verify-actions { display: flex; gap: 12px; }
+.admin-logs h3 { margin-bottom: 10px; font-size: 1rem; color: var(--text-muted); }
+.log-entry { padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 0.9rem; display: flex; flex-direction: column; gap: 4px; }
+.log-verified { background: #e8f5e9; }
+.log-rejected { background: #ffebee; }
+.log-action { font-weight: 700; text-transform: capitalize; }
+.log-admin { color: var(--text-muted); }
+.log-date { color: var(--text-muted); font-size: 0.82rem; }
+.log-notes { font-style: italic; color: var(--text); }
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-listing-list { max-height: 40vh; }
+  .hero h1 { font-size: 1.4rem; }
+  .navbar-links { gap: 12px; }
+}
