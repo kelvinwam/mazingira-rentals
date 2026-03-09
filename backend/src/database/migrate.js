@@ -147,3 +147,101 @@ async function runMigrations() {
 }
 
 runMigrations();
+
+// ── Stage 8 migrations (run safely with IF NOT EXISTS) ──────────────────────
+const stage8migrations = [
+  `ALTER TABLE apartments ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'PENDING'`,
+  `DO $$ BEGIN
+     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
+       CREATE TYPE payment_status AS ENUM ('PENDING','COMPLETED','FAILED','REFUNDED');
+     END IF;
+   END $$`,
+  `CREATE TABLE IF NOT EXISTS boost_payments (
+    id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    apartment_id   UUID        NOT NULL REFERENCES apartments(id) ON DELETE CASCADE,
+    landlord_id    UUID        NOT NULL REFERENCES users(id)      ON DELETE CASCADE,
+    amount_kes     INTEGER     NOT NULL,
+    boost_days     INTEGER     NOT NULL DEFAULT 7,
+    mpesa_code     TEXT,
+    phone          TEXT        NOT NULL,
+    status         TEXT        NOT NULL DEFAULT 'PENDING',
+    checkout_id    TEXT,
+    boost_starts_at TIMESTAMP,
+    boost_ends_at   TIMESTAMP,
+    created_at     TIMESTAMP   DEFAULT NOW(),
+    updated_at     TIMESTAMP   DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_boost_apartment ON boost_payments(apartment_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_boost_landlord  ON boost_payments(landlord_id)`,
+  `ALTER TABLE apartments ADD COLUMN IF NOT EXISTS boost_ends_at TIMESTAMP`,
+  `CREATE TABLE IF NOT EXISTS notifications (
+    id           UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id      UUID      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type         TEXT      NOT NULL,
+    title        TEXT      NOT NULL,
+    body         TEXT      NOT NULL,
+    data         JSONB     DEFAULT '{}',
+    is_read      BOOLEAN   DEFAULT false,
+    created_at   TIMESTAMP DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, is_read, created_at DESC)`,
+];
+
+async function runStage8Migrations() {
+  try {
+    await connectDB();
+    for (const sql of stage8migrations) {
+      await query(sql);
+    }
+    console.log('✅ Stage 8 migrations done');
+  } catch (err) {
+    console.error('Stage 8 migration error:', err.message);
+  }
+}
+
+// Run both when called directly
+if (require.main === module) {
+  (async () => {
+    await connectDB();
+    console.log('\n🔄 Running all migrations...');
+    for (const sql of migrations) { await query(sql); }
+    for (const sql of stage8migrations) { await query(sql); }
+    console.log(`✅ All migrations done\n`);
+    process.exit(0);
+  })().catch(err => { console.error('❌ Migration failed:', err.message); process.exit(1); });
+}
+
+module.exports = { runStage8Migrations };
+
+// Run boost expiry check — called by server on startup and every hour
+async function expireBoosts() {
+  try {
+    // Check the column exists before querying (safe on first run before migration)
+    const colCheck = await query(
+      `SELECT 1 FROM information_schema.columns
+       WHERE table_name='apartments' AND column_name='boost_ends_at' LIMIT 1`
+    );
+    if (!colCheck.rows[0]) return;
+
+    const expired = await query(
+      `UPDATE apartments SET is_boosted=false
+       WHERE is_boosted=true AND boost_ends_at IS NOT NULL AND boost_ends_at < NOW()
+       RETURNING id, landlord_id, title`
+    );
+    if (expired.rows.length > 0) {
+      console.log(`⏰ Expired ${expired.rows.length} boost(s)`);
+      // Notify each landlord
+      for (const apt of expired.rows) {
+        await query(
+          `INSERT INTO notifications (user_id, type, title, body)
+           VALUES ($1, 'BOOST_EXPIRED', '⏰ Boost Expired', $2)`,
+          [apt.landlord_id, `Your boost for "${apt.title}" has ended. Boost again to stay at the top.`]
+        ).catch(() => {});
+      }
+    }
+  } catch (err) {
+    console.error('Boost expiry check error:', err.message);
+  }
+}
+
+module.exports.expireBoosts = expireBoosts;

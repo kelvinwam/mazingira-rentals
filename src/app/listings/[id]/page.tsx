@@ -16,7 +16,7 @@ import type { ListingDetail } from '../../../types';
 import {
   MapPin, Bed, Bath, Phone, MessageSquare, ShieldCheck,
   ChevronLeft, ChevronRight, Star, Eye, ArrowLeft,
-  Loader2, Flag, Send
+  Loader2, Flag, Send, Home, Building2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -65,14 +65,14 @@ export default function ListingDetailPage() {
 
   if (error || !listing) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-surface-50 dark:bg-navy-950 px-4 text-center">
+      <Building2 size={40} className="text-navy-300 dark:text-navy-700 mb-4" />
       <p className="text-navy-500 dark:text-navy-400 mb-5">{error}</p>
       <Link href="/listings" className="btn-primary">← Back to listings</Link>
     </div>
   );
 
-  const imgs   = listing.images || [];
-  const curImg = imgs[imgIdx]?.url || '';
-
+  const imgs    = listing.images || [];
+  const curImg  = imgs[imgIdx]?.url || '';
   const grouped = (listing.amenities || []).reduce((acc: Record<string, typeof listing.amenities>, a) => {
     (acc[a.category] = acc[a.category] || []).push(a);
     return acc;
@@ -83,16 +83,30 @@ export default function ListingDetailPage() {
   const waPhone  = listing.landlord_phone.replace('+', '');
   const isOwner  = user?.id === (listing as any).landlord_id;
 
+  // Short title for the sticky card (max 40 chars)
+  const shortTitle = listing.title.length > 40
+    ? listing.title.slice(0, 40).trim() + '…'
+    : listing.title;
+
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-navy-950 flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 w-full">
 
-        <Link href="/listings"
-          className="inline-flex items-center gap-1.5 text-sm text-navy-500 hover:text-amber-600 transition-colors mb-6 group">
-          <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
-          Back to listings
-        </Link>
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-xs text-navy-400 mb-5 flex-wrap">
+          <Link href="/" className="hover:text-amber-500 transition-colors flex items-center gap-1">
+            <Home size={11} /> Home
+          </Link>
+          <span>/</span>
+          <Link href="/listings" className="hover:text-amber-500 transition-colors">Listings</Link>
+          <span>/</span>
+          <Link href={`/areas/${listing.area_slug}`} className="hover:text-amber-500 transition-colors">
+            {listing.area_name}
+          </Link>
+          <span>/</span>
+          <span className="text-navy-600 dark:text-navy-300 truncate max-w-[200px]">{listing.title}</span>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* LEFT column */}
@@ -101,9 +115,12 @@ export default function ListingDetailPage() {
             {/* Image carousel */}
             <div className="relative rounded-2xl overflow-hidden aspect-video bg-surface-200 dark:bg-navy-800">
               {curImg ? (
-                <Image src={curImg} alt={listing.title} fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover" priority />
+                <Image src={curImg} alt={listing.title} fill
+                  sizes="(max-width: 768px) 100vw, 66vw" className="object-cover" priority />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-navy-400 text-sm">No photos yet</div>
+                <div className="w-full h-full flex items-center justify-center text-navy-400 text-sm">
+                  No photos yet
+                </div>
               )}
 
               {imgs.length > 1 && (
@@ -119,8 +136,12 @@ export default function ListingDetailPage() {
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {imgs.map((_, i) => (
                       <button key={i} onClick={() => setImgIdx(i)}
-                        className={cn('h-1.5 rounded-full transition-all', i === imgIdx ? 'w-5 bg-white' : 'w-1.5 bg-white/50')} />
+                        className={cn('h-1.5 rounded-full transition-all',
+                          i === imgIdx ? 'w-5 bg-white' : 'w-1.5 bg-white/50')} />
                     ))}
+                  </div>
+                  <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-lg font-medium">
+                    {imgIdx + 1} / {imgs.length}
                   </div>
                 </>
               )}
@@ -151,7 +172,7 @@ export default function ListingDetailPage() {
                 {imgs.map((img, i) => (
                   <button key={img.id} onClick={() => setImgIdx(i)}
                     className={cn('flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all',
-                      i === imgIdx ? 'border-amber-500' : 'border-transparent opacity-70 hover:opacity-100')}>
+                      i === imgIdx ? 'border-amber-500' : 'border-transparent opacity-60 hover:opacity-100')}>
                     <Image src={img.thumbnail_url || img.url} alt="" width={64} height={64}
                       className="object-cover w-full h-full" />
                   </button>
@@ -177,9 +198,16 @@ export default function ListingDetailPage() {
               </div>
 
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-navy-500 dark:text-navy-400 mb-4">
-                <span className="flex items-center gap-1.5"><MapPin size={14} className="text-amber-500" />{listing.address_hint || listing.area_name}</span>
-                {listing.bedrooms  != null && <span className="flex items-center gap-1.5"><Bed  size={14} />{listing.bedrooms} bed</span>}
-                {listing.bathrooms != null && <span className="flex items-center gap-1.5"><Bath size={14} />{listing.bathrooms} bath</span>}
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={14} className="text-amber-500" />
+                  {listing.address_hint || listing.area_name}
+                </span>
+                {listing.bedrooms  != null && (
+                  <span className="flex items-center gap-1.5"><Bed  size={14} />{listing.bedrooms} bed</span>
+                )}
+                {listing.bathrooms != null && (
+                  <span className="flex items-center gap-1.5"><Bath size={14} />{listing.bathrooms} bath</span>
+                )}
                 <span className="flex items-center gap-1.5"><Eye size={14} />{listing.view_count} views</span>
                 {listing.avg_rating > 0 && (
                   <span className="flex items-center gap-1">
@@ -189,22 +217,111 @@ export default function ListingDetailPage() {
                 )}
               </div>
 
+              {/* Price summary row — visible on mobile before sticky card */}
+              <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl mb-4 lg:hidden">
+                <div>
+                  <p className="font-display font-extrabold text-xl text-amber-600 dark:text-amber-400">
+                    {formatKES(listing.price_kes)}
+                    <span className="text-xs font-normal text-navy-400">/mo</span>
+                  </p>
+                  {listing.deposit_kes > 0 && (
+                    <p className="text-xs text-navy-500 dark:text-navy-400 mt-0.5">
+                      Deposit: {formatKES(listing.deposit_kes)}
+                    </p>
+                  )}
+                </div>
+                {!isOwner && (
+                  <a href={`tel:${listing.landlord_phone}`}
+                    className="ml-auto btn-primary px-4 py-2 text-sm">
+                    <Phone size={14} /> Call
+                  </a>
+                )}
+              </div>
+
               <p className="text-navy-600 dark:text-navy-300 leading-relaxed text-sm whitespace-pre-line">
                 {listing.description}
               </p>
             </div>
 
+            {/* Key details card */}
+            <div className="card p-5">
+              <h3 className="font-display font-bold text-base text-navy-900 dark:text-white mb-4">Property Details</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {listing.bedrooms != null && (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-surface-100 dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+                      <Bed size={15} className="text-navy-500 dark:text-navy-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-navy-400">Bedrooms</p>
+                      <p className="font-semibold text-sm text-navy-900 dark:text-white">{listing.bedrooms}</p>
+                    </div>
+                  </div>
+                )}
+                {listing.bathrooms != null && (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-surface-100 dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+                      <Bath size={15} className="text-navy-500 dark:text-navy-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-navy-400">Bathrooms</p>
+                      <p className="font-semibold text-sm text-navy-900 dark:text-white">{listing.bathrooms}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-surface-100 dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+                    <MapPin size={15} className="text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-navy-400">Area</p>
+                    <p className="font-semibold text-sm text-navy-900 dark:text-white">{listing.area_name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                    <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">KES</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-navy-400">Monthly Rent</p>
+                    <p className="font-semibold text-sm text-navy-900 dark:text-white">{formatKES(listing.price_kes)}</p>
+                  </div>
+                </div>
+                {listing.deposit_kes > 0 && (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-surface-100 dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+                      <span className="text-navy-500 dark:text-navy-400 font-bold text-xs">DEP</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-navy-400">Deposit</p>
+                      <p className="font-semibold text-sm text-navy-900 dark:text-white">{formatKES(listing.deposit_kes)}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-surface-100 dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+                    <Eye size={15} className="text-navy-500 dark:text-navy-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-navy-400">Views</p>
+                    <p className="font-semibold text-sm text-navy-900 dark:text-white">{listing.view_count}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Amenities */}
             {Object.keys(grouped).length > 0 && (
               <div className="card p-5">
-                <h3 className="font-display font-bold text-base text-navy-900 dark:text-white mb-4">What's included</h3>
+                <h3 className="font-display font-bold text-base text-navy-900 dark:text-white mb-4">What's Included</h3>
                 <div className="space-y-4">
                   {Object.entries(grouped).map(([cat, items]) => (
                     <div key={cat}>
                       <p className="text-xs font-semibold uppercase tracking-wider text-navy-400 mb-2 capitalize">{cat}</p>
                       <div className="flex flex-wrap gap-2">
                         {items.map(a => (
-                          <span key={a.id} className="px-3 py-1.5 bg-surface-100 dark:bg-navy-800 text-navy-700 dark:text-navy-300 text-xs rounded-lg font-medium">
+                          <span key={a.id}
+                            className="px-3 py-1.5 bg-surface-100 dark:bg-navy-800 text-navy-700 dark:text-navy-300 text-xs rounded-lg font-medium">
                             {a.name}
                           </span>
                         ))}
@@ -218,7 +335,7 @@ export default function ListingDetailPage() {
             {/* Location */}
             <div className="card p-5">
               <h3 className="font-display font-bold text-base text-navy-900 dark:text-white mb-3">Location</h3>
-              <a href={`https://www.google.com/maps?q=$.toFixed(6)},$.toFixed(6)}`}
+              <a href={`https://www.google.com/maps?q=${parseFloat(String(listing.latitude)).toFixed(6)},${parseFloat(String(listing.longitude)).toFixed(6)}`}
                 target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-3 p-4 bg-surface-50 dark:bg-navy-800 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors group">
                 <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
@@ -229,7 +346,7 @@ export default function ListingDetailPage() {
                     Open in Google Maps
                   </p>
                   <p className="text-xs text-navy-400 mt-0.5">
-                    {listing.area_name}.toFixed(4).toFixed(4)
+                    {listing.area_name} · {parseFloat(String(listing.latitude)).toFixed(4)}, {parseFloat(String(listing.longitude)).toFixed(4)}
                   </p>
                 </div>
               </a>
@@ -252,6 +369,20 @@ export default function ListingDetailPage() {
           <div className="lg:col-span-1">
             <div className="card p-5 lg:sticky lg:top-24 space-y-4">
 
+              {/* Apartment name in card */}
+              <div className="pb-1">
+                <p className="text-xs text-navy-400 uppercase tracking-wider font-semibold mb-1">Property</p>
+                <p className="font-display font-bold text-sm text-navy-900 dark:text-white leading-snug">
+                  {shortTitle}
+                </p>
+                <Link href={`/areas/${listing.area_slug}`}
+                  className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline mt-1">
+                  <MapPin size={10} /> {listing.area_name}
+                </Link>
+              </div>
+
+              <div className="h-px bg-surface-100 dark:bg-navy-800" />
+
               {/* Price */}
               <div>
                 <p className="text-2xl font-display font-extrabold text-navy-900 dark:text-white">
@@ -259,9 +390,10 @@ export default function ListingDetailPage() {
                   <span className="text-sm text-navy-400 font-normal"> / month</span>
                 </p>
                 {listing.deposit_kes > 0 && (
-                  <p className="text-sm text-navy-500 dark:text-navy-400 mt-0.5">
-                    Deposit: {formatKES(listing.deposit_kes)}
-                  </p>
+                  <div className="flex items-center justify-between mt-1.5 text-sm">
+                    <span className="text-navy-500 dark:text-navy-400">Deposit</span>
+                    <span className="font-semibold text-navy-700 dark:text-navy-200">{formatKES(listing.deposit_kes)}</span>
+                  </div>
                 )}
               </div>
 
@@ -340,7 +472,7 @@ export default function ListingDetailPage() {
               <Link href={`/listings?area=${listing.area_slug}`}
                 className="flex items-center gap-2 text-sm text-navy-500 dark:text-navy-400 hover:text-amber-500 transition-colors">
                 <MapPin size={14} className="text-amber-500" />
-                More in {listing.area_name}
+                More listings in {listing.area_name}
               </Link>
             </div>
           </div>

@@ -1,9 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
+  "/admin/listings/[id]/page": "app/admin/listings/[id]/page.js",
   "/auth/login/page": "app/auth/login/page.js",
-  "/listings/page": "app/listings/page.js",
-  "/auth/register/page": "app/auth/register/page.js",
-  "/landlord/dashboard/page": "app/landlord/dashboard/page.js",
-  "/listings/[id]/page": "app/listings/[id]/page.js"
+  "/account/notifications/page": "app/account/notifications/page.js",
+  "/landlord/boost/[id]/page": "app/landlord/boost/[id]/page.js",
+  "/landlord/dashboard/page": "app/landlord/dashboard/page.js"
 }

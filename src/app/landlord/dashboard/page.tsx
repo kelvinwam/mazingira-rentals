@@ -4,14 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/authStore';
-import { landlordAPI } from '../../../lib/api';
+import { landlordAPI, notificationsAPI } from '../../../lib/api';
 import { cn, formatKES } from '../../../lib/utils';
 import Navbar from '../../../components/layout/Navbar';
 import StatsCard from '../../../components/landlord/StatsCard';
 import {
   Plus, Eye, MessageSquare, Heart, Building2,
   ToggleLeft, ToggleRight, Edit, Trash2, Loader2,
-  ShieldCheck, Clock, XCircle, CheckCircle
+  ShieldCheck, Clock, XCircle, CheckCircle,
+  Zap, Home, RefreshCw, Bell
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -35,26 +36,34 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   PENDING:   { label: 'Pending',   color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',         icon: Clock       },
   REJECTED:  { label: 'Rejected',  color: 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400',                 icon: XCircle     },
   SUSPENDED: { label: 'Suspended', color: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400',     icon: XCircle     },
-  ARCHIVED:  { label: 'Archived',  color: 'text-navy-400 bg-surface-100 dark:bg-navy-800',                                icon: XCircle     },
+  ARCHIVED:  { label: 'Archived',  color: 'text-navy-400 bg-surface-100 dark:bg-navy-800',                               icon: XCircle     },
+  RENTED:    { label: 'Rented',    color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',             icon: Home        },
 };
 
 export default function LandlordDashboard() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
 
-  const [stats,    setStats]    = useState<Stats | null>(null);
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [stats,      setStats]      = useState<Stats | null>(null);
+  const [listings,   setListings]   = useState<Listing[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [deleting,   setDeleting]   = useState<string | null>(null);
+  const [renting,    setRenting]    = useState<string | null>(null);
+  const [unread,     setUnread]     = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) { router.push('/auth/login'); return; }
     if (user?.role !== 'LANDLORD') { router.push('/listings'); return; }
 
-    Promise.all([landlordAPI.stats(), landlordAPI.listings()])
-      .then(([sRes, lRes]) => {
+    Promise.all([
+      landlordAPI.stats(),
+      landlordAPI.listings(),
+      notificationsAPI.list(),
+    ])
+      .then(([sRes, lRes, nRes]) => {
         setStats(sRes.data.data);
         setListings(lRes.data.data);
+        setUnread(nRes.data.data.unread || 0);
       })
       .catch(() => toast.error('Could not load dashboard data.'))
       .finally(() => setLoading(false));
@@ -69,6 +78,30 @@ export default function LandlordDashboard() {
       toast.success(`Marked as ${!listing.is_available ? 'available' : 'taken'}.`);
     } catch {
       toast.error('Could not update availability.');
+    }
+  };
+
+  const toggleRentStatus = async (listing: Listing) => {
+    const isRented = listing.status === 'RENTED';
+    const action   = isRented ? 'relist' : 'rent_out';
+    const confirm  = isRented
+      ? 'Re-list this apartment? It will become visible to tenants again.'
+      : 'Mark as fully rented? It will be hidden from public browse until you re-list.';
+    if (!window.confirm(confirm)) return;
+
+    setRenting(listing.id);
+    try {
+      await landlordAPI.rentStatus(listing.id, action);
+      setListings(prev => prev.map(l =>
+        l.id === listing.id
+          ? { ...l, status: isRented ? 'ACTIVE' : 'RENTED', is_available: isRented }
+          : l
+      ));
+      toast.success(isRented ? 'Listing re-listed successfully.' : 'Listing marked as rented.');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Could not update rent status.');
+    } finally {
+      setRenting(null);
     }
   };
 
@@ -104,20 +137,32 @@ export default function LandlordDashboard() {
               Welcome back, {user?.full_name?.split(' ')[0] || 'Landlord'} 👋
             </p>
           </div>
-          <Link href="/landlord/listings/new" className="btn-primary px-5 py-2.5">
-            <Plus size={16} /> New Listing
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Notifications bell */}
+            <Link href="/account/notifications"
+              className="relative w-10 h-10 rounded-xl bg-white dark:bg-navy-800 border border-surface-200 dark:border-navy-700 flex items-center justify-center text-navy-500 hover:text-amber-600 transition-colors">
+              <Bell size={16} />
+              {unread > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
+            </Link>
+            <Link href="/landlord/listings/new" className="btn-primary px-5 py-2.5">
+              <Plus size={16} /> New Listing
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatsCard icon={Building2}    label="Total Listings"
+          <StatsCard icon={Building2}     label="Total Listings"
             value={stats?.listings.total   || 0}
             sub={`${stats?.listings.active || 0} active · ${stats?.listings.pending || 0} pending`}
             color="text-amber-500" loading={loading} />
-          <StatsCard icon={Eye}          label="Total Views"      value={stats?.views     || 0} color="text-blue-500"    loading={loading} />
-          <StatsCard icon={MessageSquare}label="Inquiries"        value={stats?.inquiries || 0} color="text-purple-500"  loading={loading} />
-          <StatsCard icon={Heart}        label="Wishlisted"       value={stats?.wishlists || 0} color="text-rose-500"    loading={loading} />
+          <StatsCard icon={Eye}           label="Total Views"   value={stats?.views     || 0} color="text-blue-500"   loading={loading} />
+          <StatsCard icon={MessageSquare} label="Inquiries"     value={stats?.inquiries || 0} color="text-purple-500" loading={loading} />
+          <StatsCard icon={Heart}         label="Wishlisted"    value={stats?.wishlists || 0} color="text-rose-500"   loading={loading} />
         </div>
 
         {/* Listings table */}
@@ -142,8 +187,10 @@ export default function LandlordDashboard() {
           ) : (
             <div className="divide-y divide-surface-50 dark:divide-navy-800">
               {listings.map(listing => {
-                const status = STATUS_CONFIG[listing.status] || STATUS_CONFIG.PENDING;
+                const status     = STATUS_CONFIG[listing.status] || STATUS_CONFIG.PENDING;
                 const StatusIcon = status.icon;
+                const isRented   = listing.status === 'RENTED';
+
                 return (
                   <div key={listing.id}
                     className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 hover:bg-surface-25 dark:hover:bg-navy-900/50 transition-colors">
@@ -178,26 +225,49 @@ export default function LandlordDashboard() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* Availability toggle */}
+                    <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+
+                      {/* Availability toggle — only for ACTIVE listings */}
                       {listing.status === 'ACTIVE' && (
                         <button onClick={() => toggleAvailability(listing)}
                           className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
                             listing.is_available
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400'
-                              : 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400'
-                          )}>
-                          {listing.is_available
-                            ? <><ToggleRight size={14} /> Available</>
-                            : <><ToggleLeft  size={14} /> Taken</>}
+                              : 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400')}>
+                          {listing.is_available ? <><ToggleRight size={14} /> Available</> : <><ToggleLeft size={14} /> Taken</>}
                         </button>
                       )}
 
+                      {/* Mark as rented / Re-list */}
+                      {(listing.status === 'ACTIVE' || listing.status === 'RENTED') && (
+                        <button
+                          onClick={() => toggleRentStatus(listing)}
+                          disabled={renting === listing.id}
+                          className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
+                            isRented
+                              ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400'
+                              : 'bg-surface-100 border-surface-200 text-navy-600 dark:bg-navy-800 dark:border-navy-700 dark:text-navy-300 hover:border-blue-400')}>
+                          {renting === listing.id
+                            ? <Loader2 size={12} className="animate-spin" />
+                            : isRented ? <><RefreshCw size={12} /> Re-list</> : <><Home size={12} /> Mark Rented</>}
+                        </button>
+                      )}
+
+                      {/* Boost — only for ACTIVE listings */}
+                      {listing.status === 'ACTIVE' && (
+                        <Link href={`/landlord/boost/${listing.id}`}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400 hover:bg-amber-100 transition-all">
+                          <Zap size={12} /> Boost
+                        </Link>
+                      )}
+
+                      {/* Edit */}
                       <Link href={`/landlord/listings/${listing.id}/edit`}
                         className="w-8 h-8 rounded-lg bg-surface-100 dark:bg-navy-800 flex items-center justify-center text-navy-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
                         <Edit size={14} />
                       </Link>
 
+                      {/* Delete */}
                       <button
                         onClick={() => deleteListing(listing.id)}
                         disabled={deleting === listing.id}

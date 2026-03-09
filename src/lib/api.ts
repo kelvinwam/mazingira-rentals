@@ -87,6 +87,7 @@ export const landlordAPI = {
   createListing:      (d: Record<string, any>)         => api.post('/landlord/listings', d),
   updateListing:      (id: string, d: Record<string, any>) => api.patch(`/landlord/listings/${id}`, d),
   deleteListing:      (id: string)                     => api.delete(`/landlord/listings/${id}`),
+  rentStatus:         (id: string, action: string)     => api.patch(`/landlord/listings/${id}/rent-status`, { action }),
   toggleAvailability: (id: string, is_available: boolean) =>
     api.patch(`/landlord/listings/${id}/availability`, { is_available }),
   uploadImages: (id: string, files: File[]) => {
@@ -143,4 +144,18 @@ export const adminAPI = {
 export const searchAPI = {
   search:  (params: Record<string,any>) => api.get('/search', { params }),
   suggest: (q: string)                  => api.get('/search/suggest', { params: { q } }),
+};
+
+export const paymentsAPI = {
+  packages:  ()                                          => api.get('/payments/packages'),
+  history:   ()                                          => api.get('/payments/history'),
+  boost:     (d: { apartment_id: string; days: number; phone: string }) => api.post('/payments/boost', d),
+  confirm:   (id: string, mpesa_code: string)            => api.post(`/payments/${id}/confirm`, { mpesa_code }),
+  status:    (checkoutId: string)                        => api.get(`/payments/status/${checkoutId}`),
+};
+
+export const notificationsAPI = {
+  list:      () => api.get('/notifications'),
+  readAll:   () => api.patch('/notifications/read-all'),
+  readOne:   (id: string) => api.patch(`/notifications/${id}/read`),
 };
