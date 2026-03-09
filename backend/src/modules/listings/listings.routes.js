@@ -51,18 +51,41 @@ router.get('/', optionalAuth, async (req, res) => {
 
 /* GET /listings/featured — public */
 router.get('/featured', async (req, res) => {
-  const r = await query(
+  // Boosted listings first (always shown), then random selection from the rest
+  const boosted = await query(
     `SELECT a.id, a.title, a.price_kes, a.bedrooms, a.bathrooms,
             a.is_available, a.is_boosted, a.verification_level,
             a.avg_rating, a.review_count, a.address_hint,
             ar.name AS area_name, ar.slug AS area_slug,
             (SELECT url FROM apartment_images WHERE apartment_id=a.id AND is_primary=true LIMIT 1) AS primary_image
      FROM apartments a JOIN areas ar ON ar.id=a.area_id
-     WHERE a.status='ACTIVE'
-     ORDER BY a.is_boosted DESC, a.verification_level DESC, a.avg_rating DESC NULLS LAST
+     WHERE a.status='ACTIVE' AND a.is_boosted=true AND a.is_available=true
+     ORDER BY a.boost_ends_at DESC
      LIMIT 6`
   );
-  return ok(res, r.rows);
+
+  const needed = 6 - boosted.rows.length;
+  let others = { rows: [] };
+  if (needed > 0) {
+    const excludeIds = boosted.rows.map(r => r.id);
+    const excludeClause = excludeIds.length > 0
+      ? `AND a.id NOT IN (${excludeIds.map((_, i) => `$${i + 1}`).join(',')})`
+      : '';
+    others = await query(
+      `SELECT a.id, a.title, a.price_kes, a.bedrooms, a.bathrooms,
+              a.is_available, a.is_boosted, a.verification_level,
+              a.avg_rating, a.review_count, a.address_hint,
+              ar.name AS area_name, ar.slug AS area_slug,
+              (SELECT url FROM apartment_images WHERE apartment_id=a.id AND is_primary=true LIMIT 1) AS primary_image
+       FROM apartments a JOIN areas ar ON ar.id=a.area_id
+       WHERE a.status='ACTIVE' AND a.is_available=true ${excludeClause}
+       ORDER BY RANDOM()
+       LIMIT ${needed}`,
+      excludeIds
+    );
+  }
+
+  return ok(res, [...boosted.rows, ...others.rows]);
 });
 
 /* GET /listings/:id — public */
