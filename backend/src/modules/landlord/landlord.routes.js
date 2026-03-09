@@ -380,3 +380,89 @@ router.patch('/listings/:id/images/:imgId/primary', async (req, res) => {
 });
 
 module.exports = router;
+
+/* ── GET /landlord/analytics ─────────────────── */
+router.get('/analytics', async (req, res) => {
+  const uid = req.user.sub;
+
+  const [
+    dailyViews,
+    topListings,
+    conversionStats,
+    recentInquiries,
+    boostStats,
+  ] = await Promise.all([
+
+    // Views per day for last 14 days
+    query(`
+      SELECT DATE(el.created_at) AS day, COUNT(*) AS views
+      FROM engagement_logs el
+      JOIN apartments a ON a.id = el.apartment_id
+      WHERE a.landlord_id=$1
+        AND el.event_type='VIEW'
+        AND el.created_at >= NOW() - INTERVAL '14 days'
+      GROUP BY DATE(el.created_at)
+      ORDER BY day ASC
+    `, [uid]),
+
+    // Top performing listings by views
+    query(`
+      SELECT a.id, a.title, a.view_count, a.inquiry_count,
+             a.wishlist_count, a.avg_rating, a.price_kes,
+             a.is_boosted, a.status,
+             ar.name AS area_name,
+             (SELECT url FROM apartment_images WHERE apartment_id=a.id AND is_primary=true LIMIT 1) AS primary_image
+      FROM apartments a
+      JOIN areas ar ON ar.id=a.area_id
+      WHERE a.landlord_id=$1
+      ORDER BY a.view_count DESC
+      LIMIT 5
+    `, [uid]),
+
+    // Conversion: views → inquiries ratio per listing
+    query(`
+      SELECT
+        COALESCE(SUM(view_count),0)    AS total_views,
+        COALESCE(SUM(inquiry_count),0) AS total_inquiries,
+        COALESCE(SUM(wishlist_count),0) AS total_wishlists,
+        COUNT(*) FILTER (WHERE status::text='ACTIVE')  AS active_count,
+        COUNT(*) FILTER (WHERE status::text='RENTED')  AS rented_count
+      FROM apartments
+      WHERE landlord_id=$1
+    `, [uid]),
+
+    // Recent inquiries with listing title
+    query(`
+      SELECT i.id, i.created_at, i.last_message,
+             a.title AS listing_title,
+             u.full_name AS tenant_name
+      FROM inquiries i
+      JOIN apartments a ON a.id=i.apartment_id
+      JOIN users u ON u.id=i.tenant_id
+      WHERE i.landlord_id=$1
+      ORDER BY i.created_at DESC
+      LIMIT 5
+    `, [uid]),
+
+    // Boost history
+    query(`
+      SELECT bp.boost_days, bp.amount_kes, bp.status,
+             bp.boost_starts_at, bp.boost_ends_at,
+             a.title AS listing_title
+      FROM boost_payments bp
+      JOIN apartments a ON a.id=bp.apartment_id
+      WHERE bp.landlord_id=$1
+        AND bp.status='COMPLETED'
+      ORDER BY bp.created_at DESC
+      LIMIT 3
+    `, [uid]),
+  ]);
+
+  return ok(res, {
+    dailyViews:     dailyViews.rows,
+    topListings:    topListings.rows,
+    conversion:     conversionStats.rows[0],
+    recentInquiries: recentInquiries.rows,
+    boostHistory:   boostStats.rows,
+  });
+});

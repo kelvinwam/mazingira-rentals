@@ -145,4 +145,23 @@ router.post('/:id/report', optionalAuth,
   }
 );
 
+
+/* GET /listings/top-reviews — landing page testimonials */
+router.get('/top-reviews', async (req, res) => {
+  const r = await query(
+    `SELECT r.reviewer_name, r.rating, r.comment, r.created_at,
+            a.title AS listing_title, ar.name AS area_name
+     FROM reviews r
+     JOIN apartments a ON a.id = r.apartment_id
+     JOIN areas ar ON ar.id = a.area_id
+     WHERE r.is_visible = true
+       AND r.rating >= 4
+       AND r.comment IS NOT NULL
+       AND LENGTH(r.comment) > 30
+     ORDER BY r.rating DESC, r.created_at DESC
+     LIMIT 3`
+  );
+  return ok(res, r.rows);
+});
+
 module.exports = router;

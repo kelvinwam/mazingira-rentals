@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home } from 'lucide-react';
+import { Home, LogIn, UserPlus } from 'lucide-react';
 
 const AREAS = [
   { name: 'Machakos CBD', slug: 'machakos-cbd' },
@@ -24,9 +24,20 @@ export default function Footer() {
               </div>
               <span className="font-display font-bold text-lg text-white">MachaRent</span>
             </Link>
-            <p className="text-sm leading-relaxed text-white/50">
+            <p className="text-sm leading-relaxed text-white/50 mb-5">
               Machakos County's trusted rental marketplace. Verified, scam-free apartments.
             </p>
+            {/* Auth links in brand column */}
+            <div className="flex flex-col gap-2">
+              <Link href="/auth/login"
+                className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-amber-400 transition-colors">
+                <LogIn size={13} /> Sign In to your account
+              </Link>
+              <Link href="/auth/register?role=LANDLORD"
+                className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-amber-400 transition-colors">
+                <UserPlus size={13} /> Register as Landlord
+              </Link>
+            </div>
           </div>
 
           {/* Areas */}
@@ -49,10 +60,8 @@ export default function Footer() {
             <h4 className="font-display font-semibold text-white text-sm mb-4">Platform</h4>
             <ul className="space-y-2.5">
               {[
-                { href: '/listings',       label: 'Browse Listings'    },
+                { href: '/listings',                    label: 'Browse Listings'    },
                 { href: '/auth/register?role=LANDLORD', label: 'List Your Property' },
-                { href: '/auth/register',  label: 'Create Account'     },
-                { href: '/auth/login',     label: 'Sign In'            },
               ].map(l => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-sm hover:text-amber-400 transition-colors">{l.label}</Link>

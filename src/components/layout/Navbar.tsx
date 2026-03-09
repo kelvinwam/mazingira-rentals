@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Home, Menu, X, Moon, Sun, User, LogOut,
-  LayoutDashboard, Building2, ChevronDown, MessageSquare, Heart
+  LayoutDashboard, Building2, ChevronDown,
+  MessageSquare, Heart, TrendingUp
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore }   from '../../store/uiStore';
@@ -62,7 +63,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop links */}
+          {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
             <Link href="/listings"
               className={cn('px-3.5 py-2 rounded-xl text-sm font-medium transition-colors',
@@ -71,20 +72,11 @@ export default function Navbar() {
                   : 'text-navy-600 dark:text-navy-300 hover:text-navy-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-navy-800')}>
               Browse
             </Link>
-            {!isAuthenticated && (
-              <Link href="/auth/register?role=LANDLORD"
-                className={cn('px-3.5 py-2 rounded-xl text-sm font-medium transition-colors',
-                  isHero && !scrolled
-                    ? 'text-white/80 hover:text-white hover:bg-white/10'
-                    : 'text-navy-600 dark:text-navy-300 hover:text-navy-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-navy-800')}>
-                List Property
-              </Link>
-            )}
           </div>
 
-          {/* Right actions */}
+          {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Dark mode */}
+            {/* Dark mode toggle */}
             <button onClick={toggleDark}
               className={cn('w-9 h-9 rounded-xl flex items-center justify-center transition-colors',
                 isHero && !scrolled
@@ -93,6 +85,7 @@ export default function Navbar() {
               {dark ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
+            {/* Authenticated user menu */}
             {isAuthenticated && user ? (
               <div className="relative">
                 <button onClick={() => setProfileOpen(!profileOpen)}
@@ -119,10 +112,16 @@ export default function Navbar() {
                     </div>
 
                     {user.role === 'LANDLORD' && (
-                      <Link href="/landlord/dashboard" onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
-                        <LayoutDashboard size={15} className="text-amber-500" /> Dashboard
-                      </Link>
+                      <>
+                        <Link href="/landlord/dashboard" onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
+                          <LayoutDashboard size={15} className="text-amber-500" /> Dashboard
+                        </Link>
+                        <Link href="/landlord/analytics" onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
+                          <TrendingUp size={15} className="text-amber-500" /> Analytics
+                        </Link>
+                      </>
                     )}
                     {user.role === 'ADMIN' && (
                       <Link href="/admin/dashboard" onClick={() => setProfileOpen(false)}
@@ -131,17 +130,14 @@ export default function Navbar() {
                       </Link>
                     )}
                     <Link href="/messages" onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
-                        <MessageSquare size={15} className="text-navy-400" /> Messages
-                      </Link>
-                      <Link href="/account/wishlist" onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
-                        <Heart size={15} className="text-navy-400" /> My Wishlist
-                      </Link>
-                      <Link href="/account" onClick={() => setProfileOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
-                      <User size={15} className="text-navy-400" /> My Account
+                      <MessageSquare size={15} className="text-navy-400" /> Messages
                     </Link>
+                    <Link href="/account/wishlist" onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800 transition-colors">
+                      <Heart size={15} className="text-navy-400" /> My Wishlist
+                    </Link>
+
                     <div className="border-t border-surface-100 dark:border-navy-800 mt-1 pt-1">
                       <button onClick={handleLogout}
                         className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -151,21 +147,7 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-2">
-                <Link href="/auth/login"
-                  className={cn('px-3.5 py-2 rounded-xl text-sm font-semibold font-display transition-colors',
-                    isHero && !scrolled
-                      ? 'text-white/80 hover:text-white hover:bg-white/10'
-                      : 'text-navy-700 dark:text-navy-300 hover:bg-surface-100 dark:hover:bg-navy-800')}>
-                  Sign In
-                </Link>
-                <Link href="/auth/register"
-                  className="btn-primary px-4 py-2 text-sm">
-                  Register
-                </Link>
-              </div>
-            )}
+            ) : null}
 
             {/* Mobile hamburger */}
             <button onClick={() => setMenuOpen(!menuOpen)}
@@ -179,7 +161,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile menu */}
       {menuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
@@ -189,20 +171,14 @@ export default function Navbar() {
               <Building2 size={16} className="text-amber-500" /> Browse Listings
             </Link>
             {isAuthenticated && user?.role === 'LANDLORD' && (
-              <Link href="/landlord/dashboard" onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800">
-                <LayoutDashboard size={16} className="text-amber-500" /> Dashboard
-              </Link>
-            )}
-            {!isAuthenticated && (
               <>
-                <Link href="/auth/login" onClick={() => setMenuOpen(false)}
+                <Link href="/landlord/dashboard" onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800">
-                  <User size={16} /> Sign In
+                  <LayoutDashboard size={16} className="text-amber-500" /> Dashboard
                 </Link>
-                <Link href="/auth/register" onClick={() => setMenuOpen(false)}
-                  className="btn-primary w-full justify-center py-3">
-                  Create Account
+                <Link href="/landlord/analytics" onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-navy-700 dark:text-navy-300 hover:bg-surface-50 dark:hover:bg-navy-800">
+                  <TrendingUp size={16} className="text-amber-500" /> Analytics
                 </Link>
               </>
             )}
@@ -216,7 +192,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Close profile dropdown on outside click */}
       {profileOpen && (
         <div className="fixed inset-0 z-30" onClick={() => setProfileOpen(false)} />
       )}

@@ -5,6 +5,7 @@ import PopularAreas    from '../components/landing/PopularAreas';
 import FeaturedListings from '../components/landing/FeaturedListings';
 import TrustBar        from '../components/landing/TrustBar';
 import HowItWorks      from '../components/landing/HowItWorks';
+import Testimonials    from '../components/landing/Testimonials';
 import CTASection      from '../components/landing/CTASection';
 
 export default function HomePage() {
@@ -16,6 +17,7 @@ export default function HomePage() {
       <HowItWorks />
       <PopularAreas />
       <FeaturedListings />
+      <Testimonials />
       <CTASection />
       <Footer />
     </div>

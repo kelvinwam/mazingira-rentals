@@ -67,10 +67,11 @@ export const amenitiesAPI = {
 };
 
 export const listingsAPI = {
-  browse:   (params?: Record<string, any>) => api.get('/listings', { params }),
-  featured: ()                             => api.get('/listings/featured'),
-  detail:   (id: string)                  => api.get(`/listings/${id}`),
-  report:   (id: string, reason: string, details?: string) =>
+  browse:     (params?: Record<string, any>) => api.get('/listings', { params }),
+  featured:   ()                             => api.get('/listings/featured'),
+  topReviews: ()                             => api.get('/listings/top-reviews'),
+  detail:     (id: string)                   => api.get(`/listings/${id}`),
+  report:     (id: string, reason: string, details?: string) =>
     api.post(`/listings/${id}/report`, { reason, details }),
 };
 
@@ -158,4 +159,8 @@ export const notificationsAPI = {
   list:      () => api.get('/notifications'),
   readAll:   () => api.patch('/notifications/read-all'),
   readOne:   (id: string) => api.patch(`/notifications/${id}/read`),
+};
+
+export const analyticsAPI = {
+  landlord: () => api.get('/landlord/analytics'),
 };

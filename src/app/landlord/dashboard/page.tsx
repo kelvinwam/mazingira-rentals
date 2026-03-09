@@ -12,7 +12,7 @@ import {
   Plus, Eye, MessageSquare, Heart, Building2,
   ToggleLeft, ToggleRight, Edit, Trash2, Loader2,
   ShieldCheck, Clock, XCircle, CheckCircle,
-  Zap, Home, RefreshCw, Bell
+  Zap, Home, RefreshCw, Bell, TrendingUp
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -147,6 +147,11 @@ export default function LandlordDashboard() {
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
+            </Link>
+            <Link href="/landlord/analytics"
+              className="w-10 h-10 rounded-xl bg-white dark:bg-navy-800 border border-surface-200 dark:border-navy-700 flex items-center justify-center text-navy-500 hover:text-amber-600 transition-colors"
+              title="Analytics">
+              <TrendingUp size={16} />
             </Link>
             <Link href="/landlord/listings/new" className="btn-primary px-5 py-2.5">
               <Plus size={16} /> New Listing
