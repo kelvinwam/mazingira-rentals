@@ -138,15 +138,19 @@ async function runMigrations() {
       await query(sql);
     }
     console.log(`✅ All ${migrations.length} migrations done\n`);
-    process.exit(0);
   } catch (err) {
     console.error('\n❌ Migration failed:', err.message);
     console.error(err.stack);
-    process.exit(1);
+    throw err;
   }
 }
 
-runMigrations();
+// Only auto-run when called directly: node src/database/migrate.js
+if (require.main === module) {
+  runMigrations()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
+}
 
 // ── Stage 8 migrations (run safely with IF NOT EXISTS) ──────────────────────
 const stage8migrations = [

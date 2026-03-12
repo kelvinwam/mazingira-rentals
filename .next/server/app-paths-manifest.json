@@ -1,5 +1,8 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/listings/[id]/page": "app/listings/[id]/page.js"
+  "/listings/page": "app/listings/page.js",
+  "/landlord/dashboard/page": "app/landlord/dashboard/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/landlord/listings/[id]/edit/page": "app/landlord/listings/[id]/edit/page.js"
 }

@@ -2,7 +2,6 @@ import Navbar          from '../components/layout/Navbar';
 import Footer          from '../components/layout/Footer';
 import HeroSection     from '../components/landing/HeroSection';
 import PopularAreas    from '../components/landing/PopularAreas';
-import FeaturedListings from '../components/landing/FeaturedListings';
 import TrustBar        from '../components/landing/TrustBar';
 import HowItWorks      from '../components/landing/HowItWorks';
 import Testimonials    from '../components/landing/Testimonials';
@@ -16,7 +15,6 @@ export default function HomePage() {
       <TrustBar />
       <HowItWorks />
       <PopularAreas />
-      <FeaturedListings />
       <Testimonials />
       <CTASection />
       <Footer />

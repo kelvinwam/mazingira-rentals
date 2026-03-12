@@ -11,15 +11,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/listings/[id]/layout": [
+    "/listings/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/listings/[id]/layout.js"
+      "static/chunks/app/listings/page.js"
     ],
-    "/listings/[id]/page": [
+    "/auth/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/listings/[id]/page.js"
+      "static/chunks/app/auth/login/page.js"
+    ],
+    "/landlord/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/landlord/dashboard/page.js"
+    ],
+    "/landlord/listings/[id]/edit/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/landlord/listings/[id]/edit/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",

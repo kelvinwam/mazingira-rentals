@@ -19,13 +19,13 @@ interface Listing {
 
 export default function PopularAreas() {
   const [listings, setListings] = useState<Listing[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const fetchListings = () => {
     setLoading(true);
     listingsAPI.featured()
       .then(r => setListings(r.data.data))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   };
 
@@ -40,9 +40,6 @@ export default function PopularAreas() {
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-navy-900 dark:text-white mb-3">
               Featured Listings
             </h2>
-            <p className="text-navy-500 dark:text-navy-400 max-w-md">
-              Boosted listings appear first — refreshes show you something different every time.
-            </p>
           </div>
           <div className="hidden sm:flex items-center gap-3">
             <button onClick={fetchListings}
@@ -136,7 +133,7 @@ export default function PopularAreas() {
                   </p>
 
                   <div className="flex items-center gap-3 text-xs text-navy-500 dark:text-navy-400 mb-4">
-                    {listing.bedrooms  != null && <span className="flex items-center gap-1"><Bed  size={11} />{listing.bedrooms} bed</span>}
+                    {listing.bedrooms != null && <span className="flex items-center gap-1"><Bed size={11} />{listing.bedrooms} bed</span>}
                     {listing.bathrooms != null && <span className="flex items-center gap-1"><Bath size={11} />{listing.bathrooms} bath</span>}
                   </div>
 

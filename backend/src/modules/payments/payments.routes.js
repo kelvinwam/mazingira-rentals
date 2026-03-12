@@ -2,6 +2,7 @@ const express = require('express');
 const router  = express.Router();
 const { query } = require('../../database/connection');
 const { authenticate, requireRole } = require('../../common/middleware/auth.middleware');
+const { validateMpesaCallback }     = require('../../common/middleware/mpesa.middleware');
 const { ok, fail } = require('../../utils/helpers');
 
 // All payment routes require landlord auth
@@ -9,9 +10,9 @@ router.use(authenticate);
 router.use(requireRole('LANDLORD'));
 
 const BOOST_PACKAGES = [
-  { days: 7,  amount: 2,  label: '1 Week',    popular: false },
-  { days: 14, amount: 3,  label: '2 Weeks',   popular: true  },
-  { days: 30, amount: 6,  label: '1 Month',   popular: false },
+  { days: 7,  amount: 200,  label: '1 Week',    popular: false },
+  { days: 14, amount: 350,  label: '2 Weeks',   popular: true  },
+  { days: 30, amount: 600,  label: '1 Month',   popular: false },
 ];
 
 /* GET /payments/packages — boost packages */
@@ -54,8 +55,8 @@ router.post('/boost', async (req, res) => {
 
   // Normalize phone to 254XXXXXXXXX
   let normalizedPhone = phone.replace(/\s/g, '').replace(/^0/, '254').replace(/^\+/, '');
-  if (!/^254[17]\d{8}$/.test(normalizedPhone)) {
-    return fail(res, 'Enter a valid Safaricom number e.g. 0712345678');
+  if (!/^254(7\d{8}|1[01]\d{7})$/.test(normalizedPhone)) {
+    return fail(res, 'Enter a valid Kenyan number e.g. 0712345678');
   }
 
   // Create pending payment record
@@ -74,13 +75,16 @@ router.post('/boost', async (req, res) => {
 
   if (hasMpesa) {
     try {
-      const token = await getMpesaToken();
+      const baseUrl   = process.env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke';
+      const token     = await getMpesaToken(baseUrl);
       const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
       const shortcode = process.env.MPESA_SHORTCODE;
       const passkey   = process.env.MPESA_PASSKEY;
       const password  = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64');
 
-      const stkRes = await fetch('https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest', {
+      console.log(`[M-Pesa] Initiating STK push → ${normalizedPhone} for KES ${pkg.amount}`);
+
+      const stkRes = await fetch(`${baseUrl}/mpesa/stkpush/v1/processrequest`, {
         method:  'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -98,6 +102,8 @@ router.post('/boost', async (req, res) => {
         }),
       }).then(r => r.json());
 
+      console.log('[M-Pesa] STK response:', JSON.stringify(stkRes));
+
       if (stkRes.ResponseCode === '0') {
         await query(
           `UPDATE boost_payments SET checkout_id=$1 WHERE id=$2`,
@@ -106,12 +112,15 @@ router.post('/boost', async (req, res) => {
         return ok(res, {
           payment_id:  paymentId,
           checkout_id: stkRes.CheckoutRequestID,
+          amount:      pkg.amount,
           message:     `M-Pesa prompt sent to ${phone}. Enter your PIN to complete payment.`,
           manual:      false,
         });
+      } else {
+        console.error('[M-Pesa] STK push failed:', stkRes.ResponseDescription || stkRes.errorMessage || JSON.stringify(stkRes));
       }
     } catch (err) {
-      console.error('M-Pesa STK error:', err.message);
+      console.error('[M-Pesa] STK error:', err.message);
     }
   }
 
@@ -128,14 +137,22 @@ router.post('/boost', async (req, res) => {
 });
 
 /* POST /payments/callback — M-Pesa STK callback */
-router.post('/callback', async (req, res) => {
+router.post('/callback', validateMpesaCallback, async (req, res) => {
   try {
     const callback = req.body?.Body?.stkCallback;
     if (!callback) return res.json({ ResultCode: 0 });
 
-    const checkoutId  = callback.CheckoutRequestID;
-    const resultCode  = callback.ResultCode;
-    const mpesaCode   = callback.CallbackMetadata?.Item?.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
+    const checkoutId = callback.CheckoutRequestID;
+    const resultCode = callback.ResultCode;
+    const mpesaCode  = callback.CallbackMetadata?.Item?.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
+
+    // Idempotency — if already processed, return success silently
+    const existing = await query(
+      `SELECT status FROM boost_payments WHERE checkout_id=$1`, [checkoutId]
+    );
+    if (existing.rows[0]?.status === 'COMPLETED') {
+      return res.json({ ResultCode: 0, ResultDesc: 'Already processed' });
+    }
 
     if (resultCode === 0 && mpesaCode) {
       // Payment successful
@@ -224,14 +241,18 @@ router.get('/status/:checkoutId', async (req, res) => {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-async function getMpesaToken() {
+async function getMpesaToken(baseUrl = 'https://sandbox.safaricom.co.ke') {
   const key    = process.env.MPESA_CONSUMER_KEY;
   const secret = process.env.MPESA_CONSUMER_SECRET;
   const creds  = Buffer.from(`${key}:${secret}`).toString('base64');
   const res    = await fetch(
-    'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
+    `${baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
     { headers: { Authorization: `Basic ${creds}` } }
   ).then(r => r.json());
+  if (!res.access_token) {
+    console.error('[M-Pesa] Token error:', JSON.stringify(res));
+    throw new Error(res.errorMessage || 'Could not get M-Pesa token');
+  }
   return res.access_token;
 }
 

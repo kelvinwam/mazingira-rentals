@@ -12,7 +12,7 @@ router.get('/suggest', async (req, res) => {
 
   const [listings, areas] = await Promise.all([
     query(
-      `SELECT id, title, price_kes, address_hint,
+      `SELECT a.id, a.title, a.price_kes, a.address_hint,
               ar.name AS area_name, ar.slug AS area_slug,
               (SELECT thumbnail_url FROM apartment_images WHERE apartment_id=a.id AND is_primary=true LIMIT 1) AS thumbnail
        FROM apartments a

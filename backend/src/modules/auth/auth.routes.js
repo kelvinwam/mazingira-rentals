@@ -25,7 +25,7 @@ router.post('/register',
 
     const phone = normalizePhone(req.body.phone);
 
-    if (!/^\+254[17]\d{8}$/.test(phone)) {
+    if (!/^\+254(7\d{8}|1[01]\d{7})$/.test(phone)) {
       return fail(res, 'Enter a valid Kenyan number (e.g. 0712 345 678)');
     }
 

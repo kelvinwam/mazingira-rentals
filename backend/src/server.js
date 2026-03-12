@@ -10,7 +10,7 @@ const compression = require('compression');
 const { connectDB } = require('./database/connection');
 const { notFoundHandler, errorHandler } = require('./common/middleware/error.middleware');
 const { defaultLimiter }                = require('./common/middleware/rateLimit.middleware');
-const { expireBoosts }                  = require('./utils/expireBoosts');
+const { expireBoosts }                  = require('./database/migrate');
 
 const authRoutes          = require('./modules/auth/auth.routes');
 const usersRoutes         = require('./modules/users/users.routes');
@@ -75,7 +75,7 @@ async function bootstrap() {
     // Check every hour
     setInterval(expireBoosts, 60 * 60 * 1000);
     app.listen(PORT, () => {
-      console.log(`\n✅  MachaRent API (Stage 8) running → http://localhost:${PORT}\n`);
+      console.log(`\n✅  MachaRent API running → http://localhost:${PORT}\n`);
     });
   } catch (err) {
     console.error('❌ Failed to start:', err.message);
@@ -83,5 +83,9 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+// Only start the server when run directly — not when required by tests
+if (require.main === module) {
+  bootstrap();
+}
+
 module.exports = { app };
